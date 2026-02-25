@@ -9,5 +9,6 @@
         public string Status { get; set; }
         public DateTime LastUpdated { get; set; }
         public int ViewCount { get; set; }
+        public double Rating { get; set; }
     }
 }
