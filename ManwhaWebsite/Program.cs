@@ -1,5 +1,6 @@
 using ManwhaWebsite.Data;
 using ManwhaWebsite.Models;
+using ManwhaWebsite.Models.ManhwaVault.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddHttpClient<AniListService>();
 
 
 var app = builder.Build();
@@ -26,6 +28,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
     //context.Database.ExecuteSqlRaw("DELETE FROM Manhwas");
+
 
     if (!context.Manhwas.Any())
     {

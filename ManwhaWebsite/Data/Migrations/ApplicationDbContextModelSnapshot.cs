@@ -30,6 +30,10 @@ namespace ManwhaWebsite.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BannerImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CoverImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -40,6 +44,12 @@ namespace ManwhaWebsite.Data.Migrations
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("LatestChapter")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Popularity")
+                        .HasColumnType("int");
 
                     b.Property<double>("Rating")
                         .HasColumnType("float");

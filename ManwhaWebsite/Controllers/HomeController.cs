@@ -1,26 +1,23 @@
 using System.Diagnostics;
 using ManwhaWebsite.Models;
+using ManwhaWebsite.Models.ManhwaVault.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ManwhaWebsite.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly AniListService _aniList;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(AniListService aniList)
         {
-            _logger = logger;
+            _aniList = aniList;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
+            var data = await _aniList.GetHomepageDataAsync();
+            return View(data);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

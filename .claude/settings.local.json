@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pwsh bin/Debug/net9.0/playwright.ps1 install chromium)",
+      "Bash(dotnet tool *)",
+      "Bash(playwright install *)",
+      "Bash(dotnet build *)",
+      "Bash(taskkill //F //IM \"ManwhaWebsite.exe\")"
+    ]
+  }
+}
