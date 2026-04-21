@@ -12,6 +12,8 @@
         public int ViewCount { get; set; }          
         public int Popularity { get; set; }         
         public double Rating { get; set; }
-        public string? LatestChapter { get; set; }  
+        public string? LatestChapter { get; set; }
+        public int? ChapterCount { get; set; }
+        public List<string> Genres { get; set; } = new();
     }
 }

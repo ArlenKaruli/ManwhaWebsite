@@ -5,20 +5,27 @@
     using System.Text.Json;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Caching.Memory;
 
     namespace ManhwaVault.Services
     {
         public class AniListService
         {
             private readonly HttpClient _http;
+            private readonly IMemoryCache _cache;
+            private const string CacheKey = "homepage_data";
 
-            public AniListService(HttpClient http)
+            public AniListService(HttpClient http, IMemoryCache cache)
             {
                 _http = http;
+                _cache = cache;
             }
 
             public async Task<HomeViewModel> GetHomepageDataAsync()
             {
+                if (_cache.TryGetValue(CacheKey, out HomeViewModel? cached) && cached is not null)
+                    return cached;
+
                 var query = @"
             query HomepageData {
               trending: Page(page: 1, perPage: 5) {
@@ -35,7 +42,7 @@
                   updatedAt
                 }
               }
-              popular: Page(page: 1, perPage: 15) {
+              popular: Page(page: 1, perPage: 20) {
                 media(type: MANGA, countryOfOrigin: KR, sort: POPULARITY_DESC, isAdult: false) {
                   id
                   title { romaji english }
@@ -45,7 +52,7 @@
                   updatedAt
                 }
               }
-              updated: Page(page: 1, perPage: 9) {
+              updated: Page(page: 1, perPage: 20) {
                 media(type: MANGA, countryOfOrigin: KR, sort: UPDATED_AT_DESC, isAdult: false) {
                   id
                   title { romaji english }
@@ -68,18 +75,21 @@
                 var doc = JsonDocument.Parse(json);
                 var data = doc.RootElement.GetProperty("data");
 
-                var randomPage = new Random().Next(1, 20);
+                var randomPage = new Random().Next(1, 11);
 
                 var discoverQuery = @"
 query {
   Page(page: " + randomPage + @", perPage: 20) {
-    media(type: MANGA, countryOfOrigin: KR, sort: ID_DESC, isAdult: false) {
+    media(type: MANGA, countryOfOrigin: KR, sort: POPULARITY_DESC, averageScore_greater: 0, isAdult: false) {
       id
       title { romaji english }
       description(asHtml: false)
       coverImage { large }
       averageScore
       popularity
+      status
+      chapters
+      genres
     }
   }
 }";
@@ -90,17 +100,19 @@ query {
                 discoverResponse.EnsureSuccessStatusCode();
                 var discoverDoc = JsonDocument.Parse(await discoverResponse.Content.ReadAsStringAsync());
                 var discoverData = discoverDoc.RootElement.GetProperty("data");
-                var randomItems = MapPage(discoverData, "Page").OrderBy(_ => Guid.NewGuid()).Take(6).ToList();
+                var randomItems = MapPage(discoverData, "Page").OrderBy(_ => Guid.NewGuid()).Take(12).ToList();
 
 
 
-                return new HomeViewModel
+                var result = new HomeViewModel
                 {
                     Trending = MapPage(data, "trending"),
                     Popular = MapPage(data, "popular"),
                     NewlyUpdated = MapPage(data, "updated"),
                     Random = randomItems,
                 };
+                _cache.Set(CacheKey, result, TimeSpan.FromMinutes(20));
+                return result;
             }
 
             // ── Maps a page of results to a List<Manhwa> ─────────────
@@ -147,8 +159,19 @@ query {
 
                 // Chapter count
                 string? chapter = null;
+                int? chapterCount = null;
                 if (m.TryGetProperty("chapters", out var ch) && ch.ValueKind == JsonValueKind.Number)
-                    chapter = $"Ch. {ch.GetInt32()}";
+                {
+                    chapterCount = ch.GetInt32();
+                    chapter = $"Ch. {chapterCount}";
+                }
+
+                // Genres
+                var genres = new List<string>();
+                if (m.TryGetProperty("genres", out var g) && g.ValueKind == JsonValueKind.Array)
+                    foreach (var genre in g.EnumerateArray())
+                        if (genre.ValueKind == JsonValueKind.String && genre.GetString() is string gs)
+                            genres.Add(gs);
 
                 // Status
                 var status = m.TryGetProperty("status", out var st)
@@ -176,7 +199,9 @@ query {
                     Popularity = popularity,
                     LastUpdated = updated,
                     LatestChapter = chapter,
+                    ChapterCount = chapterCount,
                     Status = status,
+                    Genres = genres,
                 };
             }
 

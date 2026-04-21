@@ -20,16 +20,27 @@
                 <span class="nav-search-icon">⌕</span>
                 <input type="text" placeholder="Search titles, genres, authors..." />
             </div>
-            <ul class="nav-links">
-                <li><a href="#">Browse</a></li>
-                <li><a href="#">Genres</a></li>
-                <li><a href="#">Rankings</a></li>
-                <li><a href="#">Latest</a></li>
-            </ul>
-            <div class="nav-right">
-                <a href="#" class="btn-login">Sign In</a>
-                <a href="#" class="btn-signup">Join Free</a>
-                <button class="nav-hamburger" onclick="toggleDrawer()">☰</button>
+            <button class="nav-search-toggle" aria-label="Search" onclick="toggleMobileSearch()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+            <div class="nav-search-overlay" id="navSearchOverlay">
+                <div class="nav-search-overlay-inner">
+                    <input id="mobileSearchInput" type="text" placeholder="Search titles, genres, authors..." />
+                    <button class="nav-search-close" onclick="toggleMobileSearch()" aria-label="Close search">✕</button>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <div class="nav-links">
+                    <div><a href="#">Browse</a></div>
+                    <div><a href="#">Genres</a></div>
+                    <div><a href="#">Rankings</a></div>
+                    <div><a href="#">Latest</a></div>
+                </div>
+                <div class="nav-right">
+                    <a href="#" class="btn-login">Sign In</a>
+                    <a href="#" class="btn-signup">Join Free</a>
+                    <button class="nav-hamburger" onclick="toggleDrawer()">☰</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -140,12 +151,12 @@
     <section class="section-popular">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">🔥 <span>Popular</span> Right Now</h2>
+                <h2 class="section-title">🔥 <span>Popular</span></h2>
                 <a href="#" class="view-all">View All →</a>
             </div>
             <div class="scroll-row-wrapper">
                 <button class="scroll-btn scroll-btn-left" onclick="scrollRow('popularRow',-1)">‹</button>
-                <div class="scroll-row" id="popularRow">
+                <div class="scroll-row" id="popularRow" data-base-count="15">
                     @{
                         int popIdx = 0;
                     }
@@ -183,7 +194,7 @@
                 <h2 class="section-title">🆕 <span>Newly</span> Updated</h2>
                 <a href="#" class="view-all">View All →</a>
             </div>
-            <div class="updated-grid">
+            <div class="updated-grid" data-base-count="9">
                 @foreach (var item in Model.NewlyUpdated)
                 {
                     var isNew = (DateTime.UtcNow - item.LastUpdated).TotalHours < 24;
@@ -213,12 +224,55 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">✨ <span>Discover</span> Something New</h2>
-                <a href="#" class="view-all">Randomize →</a>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <a href="#" class="view-all">Randomize →</a>
+                    <button class="btn-discover-filter" id="filterToggleBtn" onclick="toggleDiscoverFilter()">⚙ Filter</button>
+                </div>
             </div>
-            <div class="discover-grid">
+
+            <div class="filter-backdrop" id="filterBackdrop" onclick="toggleDiscoverFilter()"></div>
+
+            <div class="discover-filter-panel" id="discoverFilter">
+                <div class="filter-drag-handle"></div>
+                <div class="filter-section filter-section--full">
+                    <div class="filter-label">Genre</div>
+                    <div class="filter-genres" id="filterGenresList"></div>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-label">Status</div>
+                    <div class="filter-status-btns">
+                        <button class="filter-status-btn active" data-status="all" onclick="setFilterStatus(this)">All</button>
+                        <button class="filter-status-btn" data-status="completed" onclick="setFilterStatus(this)">Completed</button>
+                        <button class="filter-status-btn" data-status="ongoing" onclick="setFilterStatus(this)">Ongoing</button>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-label">Min Rating: <span id="filterRatingDisplay">0</span></div>
+                    <input type="range" class="filter-range" id="filterRatingRange" min="0" max="10" step="0.5" value="0"
+                           oninput="document.getElementById('filterRatingDisplay').textContent=parseFloat(this.value).toFixed(1); applyDiscoverFilter()" />
+                </div>
+                <div class="filter-section">
+                    <div class="filter-label">Chapters</div>
+                    <div class="filter-chapters-row">
+                        <input type="number" class="filter-num" id="filterChMin" placeholder="Min" min="0" oninput="applyDiscoverFilter()" />
+                        <span class="filter-sep">–</span>
+                        <input type="number" class="filter-num" id="filterChMax" placeholder="Max" min="0" oninput="applyDiscoverFilter()" />
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-label">&nbsp;</div>
+                    <button class="filter-reset" onclick="resetDiscoverFilter()">↺ Reset filters</button>
+                </div>
+            </div>
+
+            <div class="discover-grid" data-base-count="6">
                 @foreach (var item in Model.Random)
                 {
-                    <a href="https://anilist.co/manga/@item.Id" target="_blank" class="discover-card">
+                    <a href="https://anilist.co/manga/@item.Id" target="_blank" class="discover-card"
+                       data-genres="@string.Join("|", item.Genres)"
+                       data-status="@item.Status"
+                       data-rating="@item.Rating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)"
+                       data-chapters="@(item.ChapterCount?.ToString() ?? "0")">
                         <div class="discover-cover">
                             <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
                         </div>
@@ -297,9 +351,140 @@
         function scrollRow(id, dir) {
             document.getElementById(id)?.scrollBy({ left: dir * 480, behavior: 'smooth' });
         }
+
+        function applyGridFill(gridEl) {
+            if (!gridEl) return;
+            const all = Array.from(gridEl.children);
+            if (!all.length) return;
+            // reset only items that aren't hidden by the filter
+            all.forEach(el => { if (!el.dataset.filteredOut) el.style.display = ''; });
+            const cols = getComputedStyle(gridEl).gridTemplateColumns.split(' ').length;
+            if (cols <= 1) return;
+            const pool = all.filter(el => !el.dataset.filteredOut);
+            const base = parseInt(gridEl.dataset.baseCount) || pool.length;
+            const ideal = Math.ceil(base / cols) * cols;
+            const avail = Math.floor(pool.length / cols) * cols;
+            const show = avail >= ideal ? ideal : (avail || pool.length);
+            pool.forEach((el, i) => {
+                el.style.display = i < show ? '' : 'none';
+                if (i < show && el.style.opacity === '0') { el.style.opacity = '1'; el.style.transform = ''; }
+            });
+        }
+        function applyGridFills() {
+            applyGridFill(document.getElementById('popularRow'));
+            applyGridFill(document.querySelector('.updated-grid'));
+            applyGridFill(document.querySelector('.discover-grid'));
+        }
+        applyGridFills();
+        let fillTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(fillTimer);
+            fillTimer = setTimeout(() => {
+                applyGridFills();
+                if (window.innerWidth > 768) {
+                    document.getElementById('filterBackdrop')?.classList.remove('visible');
+                    document.body.style.overflow = '';
+                }
+            }, 100);
+        });
+
+        // ── DISCOVER FILTER ──────────────────────────────────────────
+        function toggleDiscoverFilter() {
+            const panel    = document.getElementById('discoverFilter');
+            const btn      = document.getElementById('filterToggleBtn');
+            const backdrop = document.getElementById('filterBackdrop');
+            const open     = panel.classList.toggle('open');
+            btn.classList.toggle('active', open);
+            if (open && !document.getElementById('filterGenresList').children.length)
+                buildGenrePills();
+            if (window.innerWidth <= 768) {
+                backdrop.classList.toggle('visible', open);
+                document.body.style.overflow = open ? 'hidden' : '';
+            }
+        }
+
+        function buildGenrePills() {
+            const seen = new Set();
+            document.querySelectorAll('.discover-card[data-genres]').forEach(card => {
+                card.dataset.genres.split('|').filter(Boolean).forEach(g => seen.add(g));
+            });
+            const list = document.getElementById('filterGenresList');
+            [...seen].sort().forEach(genre => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-genre-pill';
+                btn.textContent = genre;
+                btn.onclick = () => { btn.classList.toggle('active'); applyDiscoverFilter(); };
+                list.appendChild(btn);
+            });
+        }
+
+        function setFilterStatus(btn) {
+            document.querySelectorAll('.filter-status-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyDiscoverFilter();
+        }
+
+        function applyDiscoverFilter() {
+            const activeGenres = [...document.querySelectorAll('.filter-genre-pill.active')].map(b => b.textContent);
+            const status   = document.querySelector('.filter-status-btn.active')?.dataset.status ?? 'all';
+            const minRating = parseFloat(document.getElementById('filterRatingRange').value) || 0;
+            const minCh  = parseInt(document.getElementById('filterChMin').value) || 0;
+            const maxChRaw = document.getElementById('filterChMax').value;
+            const maxCh  = maxChRaw !== '' ? parseInt(maxChRaw) : Infinity;
+
+            document.querySelectorAll('.discover-card').forEach(card => {
+                const genres   = card.dataset.genres.split('|').filter(Boolean);
+                const cardStatus = card.dataset.status ?? '';
+                const rating   = parseFloat(card.dataset.rating) || 0;
+                const chapters = parseInt(card.dataset.chapters) || 0;
+
+                let show = true;
+                if (activeGenres.length && !activeGenres.some(g => genres.includes(g))) show = false;
+                if (status === 'completed' && cardStatus !== 'FINISHED') show = false;
+                if (status === 'ongoing'   && cardStatus === 'FINISHED') show = false;
+                if (rating > 0 && rating < minRating) show = false;
+                if (minCh > 0 && chapters < minCh) show = false;
+                if (maxCh !== Infinity && chapters > maxCh) show = false;
+
+                if (show) {
+                    delete card.dataset.filteredOut;
+                    card.style.display = '';
+                } else {
+                    card.dataset.filteredOut = '1';
+                    card.style.display = 'none';
+                }
+            });
+
+            applyGridFill(document.querySelector('.discover-grid'));
+        }
+
+        function resetDiscoverFilter() {
+            document.querySelectorAll('.filter-genre-pill.active').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.filter-status-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-status="all"]').classList.add('active');
+            document.getElementById('filterRatingRange').value = 0;
+            document.getElementById('filterRatingDisplay').textContent = '0.0';
+            document.getElementById('filterChMin').value = '';
+            document.getElementById('filterChMax').value = '';
+            document.querySelectorAll('.discover-card').forEach(card => {
+                delete card.dataset.filteredOut;
+                card.style.display = '';
+            });
+            applyGridFills();
+        }
         function toggleDrawer() {
             document.getElementById('navDrawer')?.classList.toggle('open');
         }
+        function toggleMobileSearch() {
+            const overlay = document.getElementById('navSearchOverlay');
+            const isOpen = overlay.classList.toggle('is-open');
+            if (isOpen) {
+                document.getElementById('mobileSearchInput').focus();
+            }
+        }
+        document.getElementById('navSearchOverlay')?.addEventListener('click', function(e) {
+            if (e.target === this) toggleMobileSearch();
+        });
 
         // Scroll reveal
         const observer = new IntersectionObserver(entries => {

@@ -19,6 +19,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient<AniListService>();
+builder.Services.AddMemoryCache();
 
 
 var app = builder.Build();
@@ -36,7 +37,7 @@ using (var scope = app.Services.CreateScope())
             new Manhwa
             {
                 Title = "Solo Leveling",
-                Description = "The weakest hunter becomes humanity’s strongest weapon.",
+                Description = "The weakest hunter becomes humanityï¿½s strongest weapon.",
                 CoverImageUrl = "/images/sololeveling.jpg",
                 Status = "Completed",
                 LastUpdated = DateTime.Now.AddDays(-30),
