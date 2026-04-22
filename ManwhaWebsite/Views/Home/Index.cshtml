@@ -1,4 +1,7 @@
 ﻿@model ManwhaWebsite.Models.HomeViewModel
+@using ManwhaWebsite.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,8 +40,42 @@
                     <div><a href="#">Latest</a></div>
                 </div>
                 <div class="nav-right">
-                    <a href="#" class="btn-login">Sign In</a>
-                    <a href="#" class="btn-signup">Join Free</a>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <div class="nav-account-dropdown" id="profileDropdown">
+                            <button class="nav-account-btn" onclick="toggleProfileMenu(event)" aria-label="Account menu" aria-expanded="false" aria-controls="profileMenu">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                                </svg>
+                            </button>
+                            <div class="nav-account-menu" id="profileMenu" role="menu">
+                                <a href="/Identity/Account/Manage" class="nav-account-menu-item" role="menuitem">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                                    My Profile
+                                </a>
+                                <a href="/Identity/Account/Manage/ChangePassword" class="nav-account-menu-item" role="menuitem">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.01 7.01 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.47.47 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.37 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.47.47 0 0 0-.12-.61l-2.03-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>
+                                    Account Settings
+                                </a>
+                                <a href="#" class="nav-account-menu-item" role="menuitem">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                                    Notifications
+                                </a>
+                                <div class="nav-account-menu-divider"></div>
+                                <form method="post" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                    <button type="submit" class="nav-account-menu-item nav-account-menu-logout" role="menuitem">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zm-5 10H5V7h7V5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7v-2z"/></svg>
+                                        Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="/Identity/Account/Login" class="btn-login">Sign In</a>
+                        <a href="/Identity/Account/Register" class="btn-signup">Join Free</a>
+                    }
                     <button class="nav-hamburger" onclick="toggleDrawer()">☰</button>
                 </div>
             </div>
@@ -56,8 +93,16 @@
             <a href="#">Rankings</a>
             <a href="#">Latest</a>
             <hr style="border-color:var(--border);margin:8px 0" />
-            <a href="#">Sign In</a>
-            <a href="#">Join Free</a>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <a href="/Identity/Account/Manage">My Profile</a>
+                <a href="/Identity/Account/Manage/ChangePassword">Account Settings</a>
+            }
+            else
+            {
+                <a href="/Identity/Account/Login">Sign In</a>
+                <a href="/Identity/Account/Register">Join Free</a>
+            }
         </div>
     </div>
 
@@ -182,6 +227,61 @@
                 </div>
                 <button class="scroll-btn scroll-btn-right" onclick="scrollRow('popularRow',1)">›</button>
             </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         RECOMMENDED FOR YOU
+    ══════════════════════════════════════════ -->
+    <section class="section-popular">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">⭐ Recommended <span>For You</span></h2>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <div class="recommended-hint" id="recommendedHint">
+                            <span class="recommended-hint-icon">✦</span>
+                            <span>Tailored to your taste — gets smarter as you log what you've read.</span>
+                            <button class="recommended-hint-dismiss" onclick="dismissRecommendedHint()" aria-label="Dismiss">✕</button>
+                        </div>
+                    }
+                </div>
+            </div>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <div class="scroll-row-wrapper">
+                    <button class="scroll-btn scroll-btn-left" onclick="scrollRow('recommendedRow',-1)">‹</button>
+                    <div class="scroll-row" id="recommendedRow" data-base-count="15">
+                        @foreach (var item in Model.Popular)
+                        {
+                            <div class="card">
+                                <div class="card-cover">
+                                    <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
+                                    <div class="card-overlay">
+                                        <a href="https://anilist.co/manga/@item.Id" target="_blank" class="card-overlay-read">▶ View Details</a>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <div class="card-title">@item.Title</div>
+                                    <div class="card-meta">
+                                        <span class="card-rating">@item.Rating.ToString("F1")</span>
+                                        <span class="card-views">@FormatNum(item.Popularity)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <button class="scroll-btn scroll-btn-right" onclick="scrollRow('recommendedRow',1)">›</button>
+                </div>
+            }
+            else
+            {
+                <div class="recommended-signin">
+                    <p>Sign in to get personalized recommendations.</p>
+                    <a href="/Identity/Account/Login" class="recommended-signin-btn">Sign In</a>
+                </div>
+            }
         </div>
     </section>
 
@@ -485,6 +585,37 @@
         document.getElementById('navSearchOverlay')?.addEventListener('click', function(e) {
             if (e.target === this) toggleMobileSearch();
         });
+
+        function toggleProfileMenu(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('profileDropdown');
+            const menu = document.getElementById('profileMenu');
+            const btn = dropdown.querySelector('.nav-account-btn');
+            const open = dropdown.classList.toggle('open');
+            btn.setAttribute('aria-expanded', open);
+            if (!open) menu.classList.remove('open');
+        }
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+                dropdown.querySelector('.nav-account-btn')?.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Recommended hint — hidden permanently once user has logged a read manhwa
+        (function () {
+            const hint = document.getElementById('recommendedHint');
+            if (hint && localStorage.getItem('hasReadManwha')) hint.style.display = 'none';
+        })();
+
+        function dismissRecommendedHint() {
+            localStorage.setItem('hasReadManwha', '1');
+            const hint = document.getElementById('recommendedHint');
+            if (!hint) return;
+            hint.classList.add('recommended-hint--dismissed');
+            hint.addEventListener('animationend', () => hint.style.display = 'none', { once: true });
+        }
 
         // Scroll reveal
         const observer = new IntersectionObserver(entries => {

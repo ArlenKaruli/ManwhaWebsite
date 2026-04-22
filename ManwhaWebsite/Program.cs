@@ -1,6 +1,7 @@
 using ManwhaWebsite.Data;
 using ManwhaWebsite.Models;
 using ManwhaWebsite.Models.ManhwaVault.Services;
+using ManwhaWebsite.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,8 +15,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
+var smtpConfigured = !string.IsNullOrWhiteSpace(builder.Configuration["EmailSettings:Username"]);
+if (smtpConfigured)
+    builder.Services.AddTransient<IEmailSender<ApplicationUser>, SmtpEmailSender>();
+else
+    builder.Services.AddTransient<IEmailSender<ApplicationUser>, LoggingEmailSender>();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient<AniListService>();

@@ -1,0 +1,137 @@
+@using Microsoft.AspNetCore.Identity
+@using ManwhaWebsite.Models
+@inject SignInManager<ApplicationUser> SignInManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — ManhwaVault</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/identity.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/" class="nav-logo">Manhwa<span>Vault</span></a>
+            <div class="nav-search">
+                <span class="nav-search-icon">⌕</span>
+                <input type="text" placeholder="Search titles, genres, authors..." />
+            </div>
+            <button class="nav-search-toggle" aria-label="Search" onclick="toggleMobileSearch()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+            <div class="nav-search-overlay" id="navSearchOverlay">
+                <div class="nav-search-overlay-inner">
+                    <input id="mobileSearchInput" type="text" placeholder="Search titles, genres, authors..." />
+                    <button class="nav-search-close" onclick="toggleMobileSearch()" aria-label="Close search">✕</button>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <div class="nav-links">
+                    <div><a href="#">Browse</a></div>
+                    <div><a href="#">Genres</a></div>
+                    <div><a href="#">Rankings</a></div>
+                    <div><a href="#">Latest</a></div>
+                </div>
+                <div class="nav-right">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <div class="nav-account-dropdown" id="profileDropdown">
+                            <button class="nav-account-btn" onclick="toggleProfileMenu(event)" aria-label="Account menu" aria-expanded="false" aria-controls="profileMenu">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                                </svg>
+                            </button>
+                            <div class="nav-account-menu" id="profileMenu" role="menu">
+                                <a href="/Identity/Account/Manage" class="nav-account-menu-item" role="menuitem">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                                    My Profile
+                                </a>
+                                <a href="/Identity/Account/Manage/ChangePassword" class="nav-account-menu-item" role="menuitem">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.01 7.01 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.47.47 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.37 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.47.47 0 0 0-.12-.61l-2.03-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>
+                                    Account Settings
+                                </a>
+                                <div class="nav-account-menu-divider"></div>
+                                <form method="post" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/">
+                                    <button type="submit" class="nav-account-menu-item nav-account-menu-logout" role="menuitem">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zm-5 10H5V7h7V5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7v-2z"/></svg>
+                                        Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="/Identity/Account/Login" class="btn-login">Sign In</a>
+                        <a href="/Identity/Account/Register" class="btn-signup">Join Free</a>
+                    }
+                    <button class="nav-hamburger" onclick="toggleDrawer()">☰</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Drawer -->
+    <div class="nav-drawer" id="navDrawer" onclick="toggleDrawer()">
+        <div class="nav-drawer-panel" onclick="event.stopPropagation()">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:12px;">
+                Manhwa<span style="color:var(--accent)">Vault</span>
+            </div>
+            <a href="#">Browse</a>
+            <a href="#">Genres</a>
+            <a href="#">Rankings</a>
+            <a href="#">Latest</a>
+            <hr style="border-color:var(--border);margin:8px 0" />
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <a href="/Identity/Account/Manage">My Profile</a>
+                <a href="/Identity/Account/Manage/ChangePassword">Account Settings</a>
+            }
+            else
+            {
+                <a href="/Identity/Account/Login">Sign In</a>
+                <a href="/Identity/Account/Register">Join Free</a>
+            }
+        </div>
+    </div>
+
+    @RenderBody()
+
+    <script>
+        function toggleDrawer() {
+            document.getElementById('navDrawer')?.classList.toggle('open');
+        }
+        function toggleMobileSearch() {
+            const overlay = document.getElementById('navSearchOverlay');
+            const isOpen = overlay.classList.toggle('is-open');
+            if (isOpen) document.getElementById('mobileSearchInput').focus();
+        }
+        document.getElementById('navSearchOverlay')?.addEventListener('click', function (e) {
+            if (e.target === this) toggleMobileSearch();
+        });
+        function toggleProfileMenu(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('profileDropdown');
+            const btn = dropdown.querySelector('.nav-account-btn');
+            const open = dropdown.classList.toggle('open');
+            btn.setAttribute('aria-expanded', open);
+        }
+        document.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+                dropdown.querySelector('.nav-account-btn')?.setAttribute('aria-expanded', 'false');
+            }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

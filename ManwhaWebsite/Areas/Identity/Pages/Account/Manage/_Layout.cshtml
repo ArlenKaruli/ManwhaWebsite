@@ -1,0 +1,28 @@
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    var currentPage = ViewData["ActiveManagePage"] as string ?? "";
+}
+
+<div class="manage-shell">
+    <div class="manage-wrap">
+        <aside class="manage-sidebar">
+            <div class="manage-sidebar-title">Account</div>
+            <nav class="manage-nav">
+                <a class="manage-nav-item @(currentPage == "Profile" ? "active" : "")" href="/Identity/Account/Manage">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                    My Profile
+                </a>
+                <a class="manage-nav-item @(currentPage == "ChangePassword" ? "active" : "")" href="/Identity/Account/Manage/ChangePassword">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
+                    Change Password
+                </a>
+            </nav>
+        </aside>
+
+        <div class="manage-content">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@RenderSection("Scripts", required: false)
