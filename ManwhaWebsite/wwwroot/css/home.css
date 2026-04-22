@@ -389,6 +389,19 @@ button {
     background: var(--surface-2);
 }
 
+.nav-account-btn.has-pic {
+    padding: 0;
+    overflow: hidden;
+    border-color: rgba(232,68,90,0.4);
+}
+
+.nav-account-pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
 .nav-account-dropdown {
     position: relative;
 }

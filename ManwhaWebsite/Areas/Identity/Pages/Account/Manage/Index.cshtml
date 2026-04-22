@@ -8,7 +8,7 @@
 
 <div class="manage-card">
     <div class="manage-card-title">My <span>Profile</span></div>
-    <p class="manage-card-sub">Update your display name and contact info.</p>
+    <p class="manage-card-sub">Update your display name, contact info, and profile picture.</p>
 
     @if (!string.IsNullOrEmpty(Model.StatusMessage))
     {
@@ -18,25 +18,45 @@
         </div>
     }
 
-    <div class="manage-user-strip">
-        <div class="manage-avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-            </svg>
-        </div>
-        <div>
-            <div class="manage-user-name">@Model.Username</div>
-            <div class="manage-user-email">@User.Identity?.Name</div>
-        </div>
-    </div>
-
-    <form id="profile-form" method="post">
+    <form id="profile-form" method="post" enctype="multipart/form-data">
         <div asp-validation-summary="ModelOnly" class="manage-error-summary" id="valSummary" style="display:none"></div>
+
+        <div class="manage-user-strip">
+            <div class="manage-avatar-wrap">
+                <div class="manage-avatar">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                    {
+                        <img src="@Model.ProfilePictureUrl" alt="Profile picture" class="manage-avatar-img" />
+                    }
+                    else
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                        </svg>
+                    }
+                </div>
+                <input type="file" id="ProfilePictureFile" name="ProfilePictureFile" accept="image/jpeg,image/png,image/gif,image/webp" class="avatar-file-input" />
+                <input type="hidden" id="RemoveProfilePicture" name="RemoveProfilePicture" value="false" />
+            </div>
+            <div>
+                <div class="manage-user-name">@(string.IsNullOrEmpty(Model.Input.DisplayName) ? Model.Username : Model.Input.DisplayName)</div>
+                <div class="manage-user-email">@User.Identity?.Name</div>
+                <div class="avatar-actions">
+                    <label class="avatar-action-btn" for="ProfilePictureFile">Change Profile Picture</label>
+                    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                    {
+                        <button type="button" class="avatar-action-btn avatar-remove-btn" id="removeAvatarBtn">Remove</button>
+                    }
+                </div>
+                <div class="avatar-hint">JPG, PNG, GIF or WebP &bull; Max 5 MB</div>
+            </div>
+        </div>
 
         <div class="mfield">
             <label asp-for="Input.DisplayName">Display Name</label>
-            <input asp-for="Input.DisplayName" type="text" placeholder="How you appear to others" />
+            <input asp-for="Input.DisplayName" type="text" placeholder="How you appear to others" maxlength="30" />
             <span asp-validation-for="Input.DisplayName" class="mfield-error"></span>
+            <div class="mfield-hint">Max 30 characters.</div>
         </div>
 
         <div class="mfield">
@@ -61,6 +81,38 @@
         document.addEventListener('DOMContentLoaded', function () {
             var vs = document.getElementById('valSummary');
             if (vs && vs.querySelectorAll('li').length > 0) vs.style.display = 'block';
+
+            var fileInput = document.getElementById('ProfilePictureFile');
+            var removeFlag = document.getElementById('RemoveProfilePicture');
+            var avatar = document.querySelector('.manage-avatar');
+
+            fileInput.addEventListener('change', function () {
+                if (!this.files || !this.files[0]) return;
+                removeFlag.value = 'false';
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var img = avatar.querySelector('img');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.className = 'manage-avatar-img';
+                        img.alt = 'Profile picture';
+                        avatar.innerHTML = '';
+                        avatar.appendChild(img);
+                    }
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            });
+
+            var removeBtn = document.getElementById('removeAvatarBtn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function () {
+                    removeFlag.value = 'true';
+                    fileInput.value = '';
+                    avatar.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>';
+                    removeBtn.style.display = 'none';
+                });
+            }
         });
     </script>
 }
