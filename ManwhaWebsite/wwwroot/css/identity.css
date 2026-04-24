@@ -316,6 +316,111 @@
     margin: 32px 0;
 }
 
+/* ── Two-column card body ───────────────────────────────────────── */
+.manage-card-body {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+}
+
+.manage-card-form {
+    flex: 1;
+    min-width: 0;
+    padding-right: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.manage-card-form form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.manage-card-form .btn-vault {
+    margin-top: auto;
+    align-self: flex-start;
+}
+
+.manage-card-stats {
+    flex: 1;
+    min-width: 0;
+    border-left: 1px solid var(--border);
+    padding-left: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Manwha Statistics ─────────────────────────────────────────── */
+.stats-section-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 1.2px;
+    margin-bottom: 4px;
+}
+
+.stats-section-title span {
+    color: var(--accent);
+}
+
+.stats-section-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 12px;
+    flex: 1;
+}
+
+.stat-card {
+    background: var(--bg-2, #12121a);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.stat-icon {
+    color: var(--text-muted);
+    line-height: 1;
+}
+
+.stat-icon--up {
+    color: #4ade80;
+}
+
+.stat-icon--down {
+    color: var(--accent);
+}
+
+.stat-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 1px;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+}
+
 /* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width: 720px) {
     .manage-wrap {
@@ -341,4 +446,26 @@
     .manage-card-title {
         font-size: 24px;
     }
+
+    .manage-card-body {
+        flex-direction: column;
+    }
+
+    .manage-card-form {
+        padding-right: 0;
+    }
+
+    .manage-card-stats {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        padding-left: 0;
+        padding-top: 28px;
+        margin-top: 8px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: unset;
+    }
+
 }

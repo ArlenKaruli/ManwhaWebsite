@@ -15,7 +15,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredUniqueChars = 1;
+})
     .AddEntityFrameworkStores<ApplicationDbContext>();
 var smtpConfigured = !string.IsNullOrWhiteSpace(builder.Configuration["EmailSettings:Username"]);
 if (smtpConfigured)
@@ -214,6 +223,7 @@ new Manhwa
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
+    app.MapControllerRoute("dev-email", "dev/test-email", new { controller = "Dev", action = "TestEmail" });
 }
 else
 {
