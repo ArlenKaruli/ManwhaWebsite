@@ -1,0 +1,596 @@
+/* ── Manga Detail Page ─────────────────────────────────── */
+
+.manga-banner {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+    margin-top: var(--nav-h);
+}
+
+.manga-banner-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center 20%;
+    filter: blur(24px) brightness(0.4) saturate(1.3);
+    transform: scale(1.15);
+}
+
+.manga-banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(13,13,18,0.7) 60%, rgba(13,13,18,1) 100%);
+}
+
+.manga-banner-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 0;
+}
+
+.manga-banner-content .container {
+    padding-bottom: 0;
+}
+
+.manga-breadcrumb {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+}
+
+.manga-breadcrumb a {
+    color: var(--text-muted);
+    transition: color var(--transition);
+}
+
+.manga-breadcrumb a:hover {
+    color: var(--accent);
+}
+
+.manga-breadcrumb span {
+    margin: 0 6px;
+    color: var(--text-dim);
+}
+
+/* ── Body layout ───────────────────────────────────────── */
+
+.manga-body {
+    display: flex;
+    gap: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    align-items: flex-start;
+}
+
+/* ── Sidebar ───────────────────────────────────────────── */
+
+.manga-sidebar {
+    flex-shrink: 0;
+    width: 240px;
+    margin-top: -120px;
+    position: relative;
+    z-index: 10;
+}
+
+.manga-cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 2px rgba(255,255,255,0.06);
+    background: var(--surface);
+    margin-bottom: 20px;
+}
+
+.manga-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.manga-score-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 20px var(--glow-soft);
+    margin: 0 auto 20px;
+}
+
+.manga-score-num {
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: var(--text);
+    line-height: 1;
+}
+
+.manga-score-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.manga-stat-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.manga-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+}
+
+.manga-stat-row:last-child {
+    border-bottom: none;
+}
+
+.manga-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    flex-shrink: 0;
+}
+
+.manga-stat-value {
+    font-size: 13px;
+    color: var(--text);
+    text-align: right;
+    word-break: break-word;
+}
+
+.manga-stat-value.accent {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.manga-stat-value.gold {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+/* ── Main content ──────────────────────────────────────── */
+
+.manga-main {
+    flex: 1;
+    min-width: 0;
+    padding-top: 24px;
+}
+
+.manga-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 52px);
+    line-height: 1;
+    letter-spacing: 1.5px;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.manga-alt-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.manga-genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+}
+
+.manga-section-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 1.5px;
+    color: var(--text);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+}
+
+.manga-synopsis {
+    font-size: 14px;
+    line-height: 1.85;
+    color: rgba(234,234,240,0.82);
+    margin-bottom: 40px;
+    white-space: pre-wrap;
+}
+
+/* ── Characters ────────────────────────────────────────── */
+
+.characters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 14px;
+    margin-bottom: 40px;
+}
+
+.character-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all var(--transition);
+    cursor: default;
+}
+
+.character-card:hover {
+    border-color: rgba(232,68,90,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.character-img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: var(--bg-3);
+}
+
+.character-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition);
+}
+
+.character-card:hover .character-img img {
+    transform: scale(1.06);
+}
+
+.character-name {
+    padding: 8px 8px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    text-align: center;
+}
+
+/* ── User Rating ───────────────────────────────────────── */
+
+.rating-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-bottom: 40px;
+}
+
+.rating-section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+}
+
+.rating-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    align-items: center;
+}
+
+.rating-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rating-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--glow-soft);
+}
+
+.rating-btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 0 12px var(--glow-soft);
+}
+
+.rating-submit {
+    padding: 9px 24px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+    box-shadow: 0 2px 12px var(--glow-soft);
+}
+
+.rating-submit:hover {
+    background: #d63650;
+    box-shadow: 0 4px 20px var(--glow);
+    transform: translateY(-1px);
+}
+
+.rating-signin-prompt {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.rating-signin-prompt a {
+    color: var(--accent);
+    font-weight: 600;
+    transition: opacity var(--transition);
+}
+
+.rating-signin-prompt a:hover {
+    opacity: 0.8;
+}
+
+/* ── Reviews ───────────────────────────────────────────── */
+
+.reviews-section {
+    margin-bottom: 40px;
+}
+
+.review-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    transition: box-shadow var(--transition);
+}
+
+.review-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.review-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.review-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--surface-2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+}
+
+.review-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.review-avatar-placeholder {
+    font-size: 16px;
+    color: var(--text-dim);
+}
+
+.review-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.review-username {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.review-date {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+
+.review-score {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+
+.review-score::before {
+    content: '★';
+}
+
+.review-body {
+    font-size: 14px;
+    line-height: 1.75;
+    color: rgba(234,234,240,0.8);
+}
+
+.no-reviews {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-dim);
+    font-size: 14px;
+}
+
+/* ── Write Review Form ─────────────────────────────────── */
+
+.review-form-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-top: 24px;
+}
+
+.review-form-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+}
+
+.review-score-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    align-items: center;
+}
+
+.review-score-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-right: 6px;
+}
+
+.review-textarea {
+    width: 100%;
+    min-height: 120px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 12px 14px;
+    resize: vertical;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    margin-bottom: 14px;
+}
+
+.review-textarea::placeholder {
+    color: var(--text-dim);
+}
+
+.review-textarea:focus {
+    border-color: rgba(232,68,90,0.5);
+    box-shadow: 0 0 0 3px var(--glow-soft);
+}
+
+.review-submit {
+    padding: 10px 28px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+    box-shadow: 0 2px 12px var(--glow-soft);
+}
+
+.review-submit:hover {
+    background: #d63650;
+    box-shadow: 0 4px 20px var(--glow);
+    transform: translateY(-1px);
+}
+
+/* ── Mobile ────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+    .manga-body {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .manga-sidebar {
+        width: 100%;
+        margin-top: -80px;
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .manga-cover {
+        width: 140px;
+        flex-shrink: 0;
+        margin-bottom: 0;
+    }
+
+    .manga-sidebar-right {
+        flex: 1;
+        padding-top: 8px;
+    }
+
+    .manga-score-circle {
+        margin: 0 0 12px 0;
+    }
+
+    .manga-main {
+        padding-top: 20px;
+    }
+
+    .characters-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .manga-banner {
+        height: 200px;
+    }
+
+    .manga-body {
+        padding: 0 16px 60px;
+    }
+
+    .manga-sidebar {
+        margin-top: -60px;
+    }
+
+    .manga-cover {
+        width: 110px;
+    }
+
+    .manga-title {
+        font-size: 26px;
+    }
+
+    .rating-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 13px;
+    }
+}

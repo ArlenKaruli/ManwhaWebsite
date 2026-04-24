@@ -1,0 +1,291 @@
+@model ManwhaWebsite.Models.MangaDetailViewModel
+@using ManwhaWebsite.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = Model.Title;
+    var bgUrl = Model.BannerImageUrl ?? Model.CoverImageUrl;
+    var isSignedIn = SignInManager.IsSignedIn(User);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/manga-detail.css" asp-append-version="true" />
+}
+
+<!-- BANNER -->
+<div class="manga-banner">
+    <div class="manga-banner-bg" style="background-image:url('@bgUrl')"></div>
+    <div class="manga-banner-overlay"></div>
+    <div class="manga-banner-content">
+        <div class="container">
+            <div class="manga-breadcrumb">
+                <a href="/">Home</a>
+                <span>/</span>
+                <span style="color:var(--text-muted)">@Model.Title</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BODY -->
+<div class="manga-body">
+
+    <!-- SIDEBAR -->
+    <aside class="manga-sidebar">
+        <div class="manga-cover">
+            <img src="@Model.CoverImageUrl" alt="@Model.Title" />
+        </div>
+        <div class="manga-sidebar-right">
+            @if (Model.Score > 0)
+            {
+                <div class="manga-score-circle">
+                    <span class="manga-score-num">@Model.Score.ToString("F1")</span>
+                    <span class="manga-score-label">Score</span>
+                </div>
+            }
+            <div class="manga-stat-table">
+                @if (Model.ScoreRank > 0)
+                {
+                    <div class="manga-stat-row">
+                        <span class="manga-stat-label">Ranked</span>
+                        <span class="manga-stat-value accent">#@Model.ScoreRank</span>
+                    </div>
+                }
+                @if (Model.PopularityRank > 0)
+                {
+                    <div class="manga-stat-row">
+                        <span class="manga-stat-label">Popularity</span>
+                        <span class="manga-stat-value accent">#@Model.PopularityRank</span>
+                    </div>
+                }
+                <div class="manga-stat-row">
+                    <span class="manga-stat-label">Readers</span>
+                    <span class="manga-stat-value">@FormatNum(Model.Popularity)</span>
+                </div>
+                @if (Model.Favourites > 0)
+                {
+                    <div class="manga-stat-row">
+                        <span class="manga-stat-label">Favorites</span>
+                        <span class="manga-stat-value gold">@FormatNum(Model.Favourites)</span>
+                    </div>
+                }
+                <div class="manga-stat-row">
+                    <span class="manga-stat-label">Status</span>
+                    <span class="manga-stat-value">@FormatStatus(Model.Status)</span>
+                </div>
+                @if (Model.Chapters.HasValue)
+                {
+                    <div class="manga-stat-row">
+                        <span class="manga-stat-label">Chapters</span>
+                        <span class="manga-stat-value">@Model.Chapters</span>
+                    </div>
+                }
+                @if (Model.Volumes.HasValue)
+                {
+                    <div class="manga-stat-row">
+                        <span class="manga-stat-label">Volumes</span>
+                        <span class="manga-stat-value">@Model.Volumes</span>
+                    </div>
+                }
+                @if (Model.StartYear.HasValue)
+                {
+                    <div class="manga-stat-row">
+                        <span class="manga-stat-label">Year</span>
+                        <span class="manga-stat-value">@Model.StartYear</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="manga-main">
+
+        <!-- Title -->
+        <h1 class="manga-title">@Model.Title</h1>
+        @if (!string.IsNullOrEmpty(Model.AlternativeTitle))
+        {
+            <div class="manga-alt-title">@Model.AlternativeTitle</div>
+        }
+
+        <!-- Genres -->
+        @if (Model.Genres.Any())
+        {
+            <div class="manga-genres">
+                @foreach (var genre in Model.Genres)
+                {
+                    <span class="genre-pill">@genre</span>
+                }
+            </div>
+        }
+
+        <!-- Synopsis -->
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <div>
+                <div class="manga-section-title">Synopsis</div>
+                <p class="manga-synopsis">@Model.Description</p>
+            </div>
+        }
+
+        <!-- Characters -->
+        @if (Model.Characters.Any())
+        {
+            <div>
+                <div class="manga-section-title">Characters</div>
+                <div class="characters-grid">
+                    @foreach (var character in Model.Characters)
+                    {
+                        <div class="character-card">
+                            <div class="character-img">
+                                @if (!string.IsNullOrEmpty(character.ImageUrl))
+                                {
+                                    <img src="@character.ImageUrl" alt="@character.Name" loading="lazy" />
+                                }
+                            </div>
+                            <div class="character-name">@character.Name</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- User Rating -->
+        <div class="rating-section">
+            <div class="rating-section-title">Your Rating</div>
+            @if (isSignedIn)
+            {
+                <form method="post" action="/manga/@Model.AniListId/rate" id="ratingForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="score" id="ratingScoreInput" value="@(Model.CurrentUserRating ?? 0)" />
+                    <div class="rating-row" id="ratingRow">
+                        @for (int i = 1; i <= 10; i++)
+                        {
+                            var isSelected = Model.CurrentUserRating == i;
+                            <button type="button"
+                                    class="rating-btn @(isSelected ? "selected" : "")"
+                                    data-score="@i"
+                                    onclick="selectRating(@i)">@i</button>
+                        }
+                    </div>
+                    <button type="submit" class="rating-submit">Save Rating</button>
+                </form>
+            }
+            else
+            {
+                <div class="rating-signin-prompt">
+                    <a href="/Identity/Account/Login">Sign in</a> to rate this manhwa.
+                </div>
+            }
+        </div>
+
+        <!-- Reviews -->
+        <div class="reviews-section">
+            <div class="manga-section-title">Community Reviews</div>
+
+            @if (!Model.Reviews.Any())
+            {
+                <div class="no-reviews">No reviews yet. Be the first to write one!</div>
+            }
+            else
+            {
+                foreach (var review in Model.Reviews)
+                {
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="review-avatar">
+                                @if (!string.IsNullOrEmpty(review.UserProfilePicture))
+                                {
+                                    <img src="@review.UserProfilePicture" alt="@review.UserDisplayName" />
+                                }
+                                else
+                                {
+                                    <span class="review-avatar-placeholder">&#9679;</span>
+                                }
+                            </div>
+                            <div class="review-meta">
+                                <div class="review-username">@review.UserDisplayName</div>
+                                <div class="review-date">@review.CreatedAt.ToString("MMM dd, yyyy")</div>
+                            </div>
+                            <div class="review-score">@review.Score / 10</div>
+                        </div>
+                        <div class="review-body">@review.Comment</div>
+                    </div>
+                }
+            }
+
+            <!-- Write Review -->
+            @if (isSignedIn)
+            {
+                <div class="review-form-section">
+                    <div class="review-form-title">Write a Review</div>
+                    <form method="post" action="/manga/@Model.AniListId/review" id="reviewForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="score" id="reviewScoreInput" value="5" />
+                        <div class="review-score-row">
+                            <span class="review-score-label">Score:</span>
+                            @for (int i = 1; i <= 10; i++)
+                            {
+                                <button type="button"
+                                        class="rating-btn @(i == 5 ? "selected" : "")"
+                                        data-review-score="@i"
+                                        onclick="selectReviewScore(@i)">@i</button>
+                            }
+                        </div>
+                        <textarea name="comment"
+                                  class="review-textarea"
+                                  placeholder="Share your thoughts about this manhwa... (minimum 10 characters)"
+                                  maxlength="2000"
+                                  required></textarea>
+                        <button type="submit" class="review-submit">Post Review</button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:14px;">
+                    <a href="/Identity/Account/Login" style="color:var(--accent);font-weight:600;">Sign in</a> to write a review.
+                </div>
+            }
+        </div>
+
+    </main>
+</div>
+
+@section Scripts {
+<script>
+    function selectRating(score) {
+        document.getElementById('ratingScoreInput').value = score;
+        document.querySelectorAll('#ratingRow .rating-btn').forEach(btn => {
+            btn.classList.toggle('selected', parseInt(btn.dataset.score) === score);
+        });
+    }
+
+    function selectReviewScore(score) {
+        document.getElementById('reviewScoreInput').value = score;
+        document.querySelectorAll('[data-review-score]').forEach(btn => {
+            btn.classList.toggle('selected', parseInt(btn.dataset.reviewScore) === score);
+        });
+    }
+</script>
+}
+
+@functions {
+    string FormatNum(int n)
+    {
+        if (n >= 1_000_000) return $"{n / 1_000_000.0:F1}M";
+        if (n >= 1_000) return $"{n / 1_000.0:F0}K";
+        return n.ToString();
+    }
+
+    string FormatStatus(string status) => status switch
+    {
+        "FINISHED" => "Completed",
+        "RELEASING" => "Ongoing",
+        "NOT_YET_RELEASED" => "Upcoming",
+        "CANCELLED" => "Cancelled",
+        "HIATUS" => "On Hiatus",
+        _ => status,
+    };
+}

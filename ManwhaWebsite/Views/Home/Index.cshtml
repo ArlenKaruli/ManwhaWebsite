@@ -147,8 +147,8 @@
                                 <div class="hero-stat">🕐 <strong>@item.LastUpdated.ToString("MMM dd")</strong></div>
                             </div>
                             <div class="hero-actions">
-                                <a href="https://anilist.co/manga/@item.Id" target="_blank" class="btn-hero-primary">▶ View Details</a>
-                                <a href="https://anilist.co/manga/@item.Id" target="_blank" class="btn-hero-secondary">+ Add to List</a>
+                                <a href="/manga/@item.Id" class="btn-hero-primary">▶ View Details</a>
+                                <a href="/manga/@item.Id" class="btn-hero-secondary">+ Add to List</a>
                             </div>
                         </div>
                     </div>
@@ -222,7 +222,7 @@
                             <div class="card-cover">
                                 <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
                                 <div class="card-overlay">
-                                    <a href="https://anilist.co/manga/@item.Id" target="_blank" class="card-overlay-read">▶ View Details</a>
+                                    <a href="/manga/@item.Id" class="card-overlay-read">▶ View Details</a>
                                 </div>
                             </div>
                             <div class="card-info">
@@ -270,7 +270,7 @@
                                 <div class="card-cover">
                                     <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
                                     <div class="card-overlay">
-                                        <a href="https://anilist.co/manga/@item.Id" target="_blank" class="card-overlay-read">▶ View Details</a>
+                                        <a href="/manga/@item.Id" class="card-overlay-read">▶ View Details</a>
                                     </div>
                                 </div>
                                 <div class="card-info">
@@ -309,7 +309,7 @@
                 @foreach (var item in Model.NewlyUpdated)
                 {
                     var isNew = (DateTime.UtcNow - item.LastUpdated).TotalHours < 24;
-                    <a href="https://anilist.co/manga/@item.Id" target="_blank" class="updated-card">
+                    <a href="/manga/@item.Id" class="updated-card">
                         <div class="updated-cover">
                             <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
                             @if (isNew)
@@ -379,7 +379,7 @@
             <div class="discover-grid" data-base-count="6">
                 @foreach (var item in Model.Random)
                 {
-                    <a href="https://anilist.co/manga/@item.Id" target="_blank" class="discover-card"
+                    <a href="/manga/@item.Id" class="discover-card"
                        data-genres="@string.Join("|", item.Genres)"
                        data-status="@item.Status"
                        data-rating="@item.Rating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)"

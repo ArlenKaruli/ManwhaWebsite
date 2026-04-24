@@ -205,6 +205,147 @@ query {
                 };
             }
 
+            public async Task<MangaDetailViewModel?> GetMangaDetailAsync(int id)
+            {
+                var cacheKey = $"manga_detail_{id}";
+                if (_cache.TryGetValue(cacheKey, out MangaDetailViewModel? cached) && cached is not null)
+                    return cached;
+
+                var query = @"
+query MangaDetail($id: Int) {
+  Media(id: $id, type: MANGA) {
+    id
+    title { romaji english }
+    description(asHtml: false)
+    coverImage { extraLarge large }
+    bannerImage
+    averageScore
+    popularity
+    favourites
+    status
+    chapters
+    volumes
+    genres
+    startDate { year }
+    rankings { rank type allTime }
+    characters(page: 1, perPage: 12, sort: ROLE) {
+      nodes { id name { full } image { large } }
+    }
+  }
+}";
+                var body = JsonSerializer.Serialize(new { query, variables = new { id } });
+                var content = new StringContent(body, Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync("https://graphql.anilist.co", content);
+                if (!response.IsSuccessStatusCode) return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("data", out var data)) return null;
+                if (!data.TryGetProperty("Media", out var m) || m.ValueKind == JsonValueKind.Null) return null;
+
+                var titleNode = m.TryGetProperty("title", out var t) ? t : default;
+                var english = GetString(titleNode, "english");
+                var romaji = GetString(titleNode, "romaji");
+                var title = english ?? romaji ?? "Unknown";
+                var altTitle = english != null && romaji != null && romaji != english ? romaji : null;
+
+                var coverNode = m.TryGetProperty("coverImage", out var c) ? c : default;
+                var cover = GetString(coverNode, "extraLarge") ?? GetString(coverNode, "large") ?? "";
+                var banner = m.TryGetProperty("bannerImage", out var b) && b.ValueKind == JsonValueKind.String
+                    ? b.GetString() ?? "" : "";
+
+                double score = 0;
+                if (m.TryGetProperty("averageScore", out var s) && s.ValueKind == JsonValueKind.Number)
+                    score = Math.Round(s.GetDouble() / 10.0, 1);
+
+                int popularity = 0;
+                if (m.TryGetProperty("popularity", out var p) && p.ValueKind == JsonValueKind.Number)
+                    popularity = p.GetInt32();
+
+                int favourites = 0;
+                if (m.TryGetProperty("favourites", out var fav) && fav.ValueKind == JsonValueKind.Number)
+                    favourites = fav.GetInt32();
+
+                var status = m.TryGetProperty("status", out var st) && st.ValueKind == JsonValueKind.String
+                    ? st.GetString() ?? "" : "";
+
+                int? chapters = null;
+                if (m.TryGetProperty("chapters", out var ch) && ch.ValueKind == JsonValueKind.Number)
+                    chapters = ch.GetInt32();
+
+                int? volumes = null;
+                if (m.TryGetProperty("volumes", out var vol) && vol.ValueKind == JsonValueKind.Number)
+                    volumes = vol.GetInt32();
+
+                int? startYear = null;
+                if (m.TryGetProperty("startDate", out var sd) && sd.TryGetProperty("year", out var yr)
+                    && yr.ValueKind == JsonValueKind.Number)
+                    startYear = yr.GetInt32();
+
+                var desc = m.TryGetProperty("description", out var d) && d.ValueKind == JsonValueKind.String
+                    ? StripHtmlFull(d.GetString() ?? "") : "";
+
+                var genres = new List<string>();
+                if (m.TryGetProperty("genres", out var g) && g.ValueKind == JsonValueKind.Array)
+                    foreach (var genre in g.EnumerateArray())
+                        if (genre.ValueKind == JsonValueKind.String && genre.GetString() is string gs)
+                            genres.Add(gs);
+
+                int scoreRank = 0, popularityRank = 0;
+                if (m.TryGetProperty("rankings", out var rankings) && rankings.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var r in rankings.EnumerateArray())
+                    {
+                        var allTime = r.TryGetProperty("allTime", out var at) && at.ValueKind == JsonValueKind.True;
+                        if (!allTime) continue;
+                        var rType = r.TryGetProperty("type", out var rt) && rt.ValueKind == JsonValueKind.String
+                            ? rt.GetString() : "";
+                        var rank = r.TryGetProperty("rank", out var rk) && rk.ValueKind == JsonValueKind.Number
+                            ? rk.GetInt32() : 0;
+                        if (rType == "RATED" && scoreRank == 0) scoreRank = rank;
+                        if (rType == "POPULAR" && popularityRank == 0) popularityRank = rank;
+                    }
+                }
+
+                var characters = new List<CharacterInfo>();
+                if (m.TryGetProperty("characters", out var chars) && chars.TryGetProperty("nodes", out var nodes)
+                    && nodes.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var node in nodes.EnumerateArray())
+                    {
+                        var nameNode = node.TryGetProperty("name", out var n) ? n : default;
+                        var fullName = GetString(nameNode, "full") ?? "Unknown";
+                        var imgNode = node.TryGetProperty("image", out var img) ? img : default;
+                        var imgUrl = GetString(imgNode, "large") ?? "";
+                        characters.Add(new CharacterInfo { Name = fullName, ImageUrl = imgUrl });
+                    }
+                }
+
+                var vm = new MangaDetailViewModel
+                {
+                    AniListId = id,
+                    Title = title,
+                    AlternativeTitle = altTitle,
+                    Description = desc,
+                    CoverImageUrl = cover,
+                    BannerImageUrl = string.IsNullOrEmpty(banner) ? null : banner,
+                    Score = score,
+                    ScoreRank = scoreRank,
+                    PopularityRank = popularityRank,
+                    Popularity = popularity,
+                    Favourites = favourites,
+                    Status = status,
+                    Chapters = chapters,
+                    Volumes = volumes,
+                    StartYear = startYear,
+                    Genres = genres,
+                    Characters = characters,
+                };
+
+                _cache.Set(cacheKey, vm, TimeSpan.FromMinutes(30));
+                return vm;
+            }
+
             // ── Helpers ───────────────────────────────────────────────
             private static string? GetString(JsonElement el, string key)
             {
@@ -218,6 +359,12 @@ query {
                 var plain = Regex.Replace(input, "<.*?>", " ");
                 plain = Regex.Replace(plain, @"\s{2,}", " ").Trim();
                 return plain.Length > 300 ? plain[..300] + "…" : plain;
+            }
+
+            private static string StripHtmlFull(string input)
+            {
+                var plain = Regex.Replace(input, "<.*?>", " ");
+                return Regex.Replace(plain, @"\s{2,}", " ").Trim();
             }
         }
     }
