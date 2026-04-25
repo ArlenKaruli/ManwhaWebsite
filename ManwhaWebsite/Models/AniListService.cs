@@ -346,6 +346,135 @@ query MangaDetail($id: Int) {
                 return vm;
             }
 
+            public async Task<List<Manhwa>> GetDiscoverAsync()
+            {
+                var randomPage = new Random().Next(1, 11);
+                var gql = @"
+query {
+  Page(page: " + randomPage + @", perPage: 20) {
+    media(type: MANGA, countryOfOrigin: KR, sort: POPULARITY_DESC, averageScore_greater: 0, isAdult: false) {
+      id
+      title { romaji english }
+      description(asHtml: false)
+      coverImage { large }
+      averageScore
+      popularity
+      status
+      chapters
+      genres
+    }
+  }
+}";
+                var body = JsonSerializer.Serialize(new { query = gql, variables = new { } });
+                var content = new StringContent(body, Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync("https://graphql.anilist.co", content);
+                if (!response.IsSuccessStatusCode) return new List<Manhwa>();
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("data", out var data)) return new List<Manhwa>();
+                return MapPage(data, "Page").OrderBy(_ => Guid.NewGuid()).Take(20).ToList();
+            }
+
+            public async Task<List<Manhwa>> BrowseAsync(
+                string? search,
+                List<string>? genres,
+                string? status,
+                double? minRating,
+                int? minChapters,
+                int? maxChapters,
+                int? publishedBefore,
+                int? publishedAfter,
+                int page = 1)
+            {
+                var filters = new List<string> { "type: MANGA", "countryOfOrigin: KR", "isAdult: false" };
+                bool hasSearch = !string.IsNullOrWhiteSpace(search);
+
+                if (hasSearch)
+                    filters.Add("search: $search");
+
+                var allowedGenres = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror",
+                    "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life",
+                    "Sports", "Supernatural", "Thriller"
+                };
+                var safeGenres = genres?.Where(g => allowedGenres.Contains(g)).ToList();
+                if (safeGenres?.Count > 0)
+                    filters.Add($"genre_in: [{string.Join(", ", safeGenres.Select(g => $"\"{g}\""))}]");
+
+                var allowedStatuses = new HashSet<string> { "FINISHED", "RELEASING", "NOT_YET_RELEASED", "HIATUS", "CANCELLED" };
+                if (!string.IsNullOrWhiteSpace(status) && allowedStatuses.Contains(status.ToUpper()))
+                    filters.Add($"status: {status.ToUpper()}");
+
+                if (minRating > 0)
+                    filters.Add($"averageScore_greater: {(int)(minRating!.Value * 10)}");
+
+                if (minChapters > 0)
+                    filters.Add($"chapters_greater: {minChapters!.Value - 1}");
+
+                if (maxChapters > 0)
+                    filters.Add($"chapters_lesser: {maxChapters!.Value + 1}");
+
+                if (publishedAfter > 0)
+                    filters.Add($"startDate_greater: {publishedAfter!.Value * 10000}");
+
+                if (publishedBefore > 0)
+                    filters.Add($"startDate_lesser: {publishedBefore!.Value * 10000 + 1231}");
+
+                filters.Add(hasSearch ? "sort: SEARCH_MATCH" : "sort: POPULARITY_DESC");
+
+                var varDecl = hasSearch ? "($search: String)" : "";
+                var gql = $@"
+query Browse{varDecl} {{
+  Page(page: {page}, perPage: 40) {{
+    media({string.Join(", ", filters)}) {{
+      id
+      title {{ romaji english }}
+      coverImage {{ large }}
+      averageScore
+      status
+      chapters
+      genres
+    }}
+  }}
+}}";
+
+                var variables = hasSearch ? (object)new { search = search!.Trim() } : new { };
+                var body = JsonSerializer.Serialize(new { query = gql, variables });
+                var reqContent = new StringContent(body, Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync("https://graphql.anilist.co", reqContent);
+                if (!response.IsSuccessStatusCode) return new List<Manhwa>();
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("data", out var data)) return new List<Manhwa>();
+                return MapPage(data, "Page");
+            }
+
+            public async Task<List<Manhwa>> SearchAsync(string query, int count = 8)
+            {
+                var gql = @"
+query Search($search: String, $perPage: Int) {
+  Page(page: 1, perPage: $perPage) {
+    media(type: MANGA, countryOfOrigin: KR, search: $search, isAdult: false, sort: SEARCH_MATCH) {
+      id
+      title { romaji english }
+      coverImage { large }
+      averageScore
+      status
+      chapters
+    }
+  }
+}";
+                var body = JsonSerializer.Serialize(new { query = gql, variables = new { search = query, perPage = count } });
+                var content = new StringContent(body, Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync("https://graphql.anilist.co", content);
+                if (!response.IsSuccessStatusCode) return new List<Manhwa>();
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("data", out var data)) return new List<Manhwa>();
+                return MapPage(data, "Page");
+            }
+
             // ── Helpers ───────────────────────────────────────────────
             private static string? GetString(JsonElement el, string key)
             {

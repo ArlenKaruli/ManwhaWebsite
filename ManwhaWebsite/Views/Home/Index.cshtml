@@ -25,7 +25,7 @@
             <a href="#" class="nav-logo">Manhwa<span>Vault</span></a>
             <div class="nav-search">
                 <span class="nav-search-icon">⌕</span>
-                <input type="text" placeholder="Search titles, genres, authors..." />
+                <input id="navSearchInput" type="text" placeholder="Search titles, genres, authors..." autocomplete="off" />
             </div>
             <button class="nav-search-toggle" aria-label="Search" onclick="toggleMobileSearch()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -38,7 +38,7 @@
             </div>
             <div class="nav-actions">
                 <div class="nav-links">
-                    <div><a href="#">Browse</a></div>
+                    <div><a href="/Browse">Browse</a></div>
                     <div><a href="#">Genres</a></div>
                     <div><a href="#">Rankings</a></div>
                     <div><a href="#">Latest</a></div>
@@ -99,7 +99,7 @@
             <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:12px;">
                 Manhwa<span style="color:var(--accent)">Vault</span>
             </div>
-            <a href="#">Browse</a>
+            <a href="/Browse">Browse</a>
             <a href="#">Genres</a>
             <a href="#">Rankings</a>
             <a href="#">Latest</a>
@@ -180,26 +180,6 @@
         </div>
     </section>
 
-    <!-- GENRE PILLS -->
-    <div class="genres-band">
-        <div class="genres-scroll">
-            <a href="#" class="genre-pill active">All</a>
-            <a href="#" class="genre-pill">Action</a>
-            <a href="#" class="genre-pill">Romance</a>
-            <a href="#" class="genre-pill">Fantasy</a>
-            <a href="#" class="genre-pill">System</a>
-            <a href="#" class="genre-pill">Regression</a>
-            <a href="#" class="genre-pill">Isekai</a>
-            <a href="#" class="genre-pill">Martial Arts</a>
-            <a href="#" class="genre-pill">Horror</a>
-            <a href="#" class="genre-pill">Comedy</a>
-            <a href="#" class="genre-pill">Drama</a>
-            <a href="#" class="genre-pill">Cultivation</a>
-            <a href="#" class="genre-pill">Thriller</a>
-            <a href="#" class="genre-pill">Historical</a>
-            <a href="#" class="genre-pill">Slice of Life</a>
-        </div>
-    </div>
 
     <!-- ══════════════════════════════════════════
          POPULAR — from Model.Popular
@@ -221,9 +201,6 @@
                         <div class="card">
                             <div class="card-cover">
                                 <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
-                                <div class="card-overlay">
-                                    <a href="/manga/@item.Id" class="card-overlay-read">▶ View Details</a>
-                                </div>
                             </div>
                             <div class="card-info">
                                 <div class="card-title">@item.Title</div>
@@ -269,9 +246,6 @@
                             <div class="card">
                                 <div class="card-cover">
                                     <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
-                                    <div class="card-overlay">
-                                        <a href="/manga/@item.Id" class="card-overlay-read">▶ View Details</a>
-                                    </div>
                                 </div>
                                 <div class="card-info">
                                     <div class="card-title">@item.Title</div>
@@ -335,45 +309,7 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">✨ <span>Discover</span> Something New</h2>
-                <div style="display:flex;gap:10px;align-items:center;">
-                    <a href="#" class="view-all">Randomize →</a>
-                    <button class="btn-discover-filter" id="filterToggleBtn" onclick="toggleDiscoverFilter()">⚙ Filter</button>
-                </div>
-            </div>
-
-            <div class="filter-backdrop" id="filterBackdrop" onclick="toggleDiscoverFilter()"></div>
-
-            <div class="discover-filter-panel" id="discoverFilter">
-                <div class="filter-drag-handle"></div>
-                <div class="filter-section filter-section--full">
-                    <div class="filter-label">Genre</div>
-                    <div class="filter-genres" id="filterGenresList"></div>
-                </div>
-                <div class="filter-section">
-                    <div class="filter-label">Status</div>
-                    <div class="filter-status-btns">
-                        <button class="filter-status-btn active" data-status="all" onclick="setFilterStatus(this)">All</button>
-                        <button class="filter-status-btn" data-status="completed" onclick="setFilterStatus(this)">Completed</button>
-                        <button class="filter-status-btn" data-status="ongoing" onclick="setFilterStatus(this)">Ongoing</button>
-                    </div>
-                </div>
-                <div class="filter-section">
-                    <div class="filter-label">Min Rating: <span id="filterRatingDisplay">0</span></div>
-                    <input type="range" class="filter-range" id="filterRatingRange" min="0" max="10" step="0.5" value="0"
-                           oninput="document.getElementById('filterRatingDisplay').textContent=parseFloat(this.value).toFixed(1); applyDiscoverFilter()" />
-                </div>
-                <div class="filter-section">
-                    <div class="filter-label">Chapters</div>
-                    <div class="filter-chapters-row">
-                        <input type="number" class="filter-num" id="filterChMin" placeholder="Min" min="0" oninput="applyDiscoverFilter()" />
-                        <span class="filter-sep">–</span>
-                        <input type="number" class="filter-num" id="filterChMax" placeholder="Max" min="0" oninput="applyDiscoverFilter()" />
-                    </div>
-                </div>
-                <div class="filter-section">
-                    <div class="filter-label">&nbsp;</div>
-                    <button class="filter-reset" onclick="resetDiscoverFilter()">↺ Reset filters</button>
-                </div>
+                <button class="view-all discover-randomize-btn" id="discoverRandomizeBtn" onclick="randomizeDiscover()">↺ Randomize</button>
             </div>
 
             <div class="discover-grid" data-base-count="6">
@@ -499,89 +435,47 @@
             }, 100);
         });
 
-        // ── DISCOVER FILTER ──────────────────────────────────────────
-        function toggleDiscoverFilter() {
-            const panel    = document.getElementById('discoverFilter');
-            const btn      = document.getElementById('filterToggleBtn');
-            const backdrop = document.getElementById('filterBackdrop');
-            const open     = panel.classList.toggle('open');
-            btn.classList.toggle('active', open);
-            if (open && !document.getElementById('filterGenresList').children.length)
-                buildGenrePills();
-            if (window.innerWidth <= 768) {
-                backdrop.classList.toggle('visible', open);
-                document.body.style.overflow = open ? 'hidden' : '';
+        // ── DISCOVER RANDOMIZE ───────────────────────────────────────
+        async function randomizeDiscover() {
+            const btn  = document.getElementById('discoverRandomizeBtn');
+            const grid = document.querySelector('.discover-grid');
+            btn.disabled = true;
+            btn.textContent = '↻ Loading…';
+            grid.style.opacity = '0.4';
+            grid.style.pointerEvents = 'none';
+            try {
+                const res = await fetch('/Home/RandomDiscover');
+                if (!res.ok) throw new Error();
+                const items = await res.json();
+                grid.innerHTML = items.map(m => {
+                    const score = m.score > 0 ? m.score.toFixed(1) : '—';
+                    const pop   = m.popularity > 1000
+                        ? (m.popularity / 1000).toFixed(1) + 'k'
+                        : String(m.popularity);
+                    const desc  = m.description
+                        ? m.description.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                        : '';
+                    return `<a href="/manga/${m.id}" class="discover-card">
+                        <div class="discover-cover"><img src="${m.cover||''}" alt="" loading="lazy"></div>
+                        <div class="discover-body">
+                            <div class="discover-title">${m.title||''}</div>
+                            <div class="discover-desc">${desc}</div>
+                            <div class="discover-footer">
+                                <span class="discover-rating">${score}</span>
+                                <span class="discover-views">${pop} readers</span>
+                            </div>
+                        </div>
+                    </a>`;
+                }).join('');
+                applyGridFill(grid);
+            } catch (e) {
+                // silently restore on error
+            } finally {
+                grid.style.opacity = '';
+                grid.style.pointerEvents = '';
+                btn.disabled = false;
+                btn.textContent = '↺ Randomize';
             }
-        }
-
-        function buildGenrePills() {
-            const seen = new Set();
-            document.querySelectorAll('.discover-card[data-genres]').forEach(card => {
-                card.dataset.genres.split('|').filter(Boolean).forEach(g => seen.add(g));
-            });
-            const list = document.getElementById('filterGenresList');
-            [...seen].sort().forEach(genre => {
-                const btn = document.createElement('button');
-                btn.className = 'filter-genre-pill';
-                btn.textContent = genre;
-                btn.onclick = () => { btn.classList.toggle('active'); applyDiscoverFilter(); };
-                list.appendChild(btn);
-            });
-        }
-
-        function setFilterStatus(btn) {
-            document.querySelectorAll('.filter-status-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            applyDiscoverFilter();
-        }
-
-        function applyDiscoverFilter() {
-            const activeGenres = [...document.querySelectorAll('.filter-genre-pill.active')].map(b => b.textContent);
-            const status   = document.querySelector('.filter-status-btn.active')?.dataset.status ?? 'all';
-            const minRating = parseFloat(document.getElementById('filterRatingRange').value) || 0;
-            const minCh  = parseInt(document.getElementById('filterChMin').value) || 0;
-            const maxChRaw = document.getElementById('filterChMax').value;
-            const maxCh  = maxChRaw !== '' ? parseInt(maxChRaw) : Infinity;
-
-            document.querySelectorAll('.discover-card').forEach(card => {
-                const genres   = card.dataset.genres.split('|').filter(Boolean);
-                const cardStatus = card.dataset.status ?? '';
-                const rating   = parseFloat(card.dataset.rating) || 0;
-                const chapters = parseInt(card.dataset.chapters) || 0;
-
-                let show = true;
-                if (activeGenres.length && !activeGenres.some(g => genres.includes(g))) show = false;
-                if (status === 'completed' && cardStatus !== 'FINISHED') show = false;
-                if (status === 'ongoing'   && cardStatus === 'FINISHED') show = false;
-                if (rating > 0 && rating < minRating) show = false;
-                if (minCh > 0 && chapters < minCh) show = false;
-                if (maxCh !== Infinity && chapters > maxCh) show = false;
-
-                if (show) {
-                    delete card.dataset.filteredOut;
-                    card.style.display = '';
-                } else {
-                    card.dataset.filteredOut = '1';
-                    card.style.display = 'none';
-                }
-            });
-
-            applyGridFill(document.querySelector('.discover-grid'));
-        }
-
-        function resetDiscoverFilter() {
-            document.querySelectorAll('.filter-genre-pill.active').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.filter-status-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('[data-status="all"]').classList.add('active');
-            document.getElementById('filterRatingRange').value = 0;
-            document.getElementById('filterRatingDisplay').textContent = '0.0';
-            document.getElementById('filterChMin').value = '';
-            document.getElementById('filterChMax').value = '';
-            document.querySelectorAll('.discover-card').forEach(card => {
-                delete card.dataset.filteredOut;
-                card.style.display = '';
-            });
-            applyGridFills();
         }
         function toggleDrawer() {
             document.getElementById('navDrawer')?.classList.toggle('open');
@@ -643,6 +537,8 @@
             observer.observe(el);
         });
     </script>
+
+    <script src="~/js/search.js" asp-append-version="true"></script>
 
     @functions {
         string FormatNum(int n)

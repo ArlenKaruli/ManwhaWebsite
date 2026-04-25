@@ -17,15 +17,6 @@
 <div class="manga-banner">
     <div class="manga-banner-bg" style="background-image:url('@bgUrl')"></div>
     <div class="manga-banner-overlay"></div>
-    <div class="manga-banner-content">
-        <div class="container">
-            <div class="manga-breadcrumb">
-                <a href="/">Home</a>
-                <span>/</span>
-                <span style="color:var(--text-muted)">@Model.Title</span>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- BODY -->
@@ -37,13 +28,51 @@
             <img src="@Model.CoverImageUrl" alt="@Model.Title" />
         </div>
         <div class="manga-sidebar-right">
-            @if (Model.Score > 0)
-            {
-                <div class="manga-score-circle">
-                    <span class="manga-score-num">@Model.Score.ToString("F1")</span>
-                    <span class="manga-score-label">Score</span>
+            <div class="manga-score-box">
+                @if (Model.Score > 0)
+                {
+                    <div class="score-community">
+                        <span class="manga-score-num">@Model.Score.ToString("F1")</span>
+                        <span class="manga-score-label">Community Score</span>
+                    </div>
+                    <div class="score-box-divider"></div>
+                }
+                <div class="score-user">
+                    <span class="score-user-label">Your Score</span>
+                    @if (isSignedIn)
+                    {
+                        <form method="post" action="/manga/@Model.AniListId/rate" id="ratingForm">
+                            @Html.AntiForgeryToken()
+                            <select name="score" class="rating-select">
+                                @if (!Model.CurrentUserRating.HasValue)
+                                {
+                                    <option value="0" selected>— Select —</option>
+                                }
+                                else
+                                {
+                                    <option value="0">— Select —</option>
+                                }
+                                @for (int i = 1; i <= 10; i++)
+                                {
+                                    if (Model.CurrentUserRating == i)
+                                    {
+                                        <option value="@i" selected>@i / 10</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@i">@i / 10</option>
+                                    }
+                                }
+                            </select>
+                            <button type="submit" class="rp-save">Save Rating</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="/Identity/Account/Login" class="score-user-signin">Sign in to rate</a>
+                    }
                 </div>
-            }
+            </div>
             <div class="manga-stat-table">
                 @if (Model.ScoreRank > 0)
                 {
@@ -102,6 +131,12 @@
     <!-- MAIN -->
     <main class="manga-main">
 
+        <div class="manga-breadcrumb">
+            <a href="/">Home</a>
+            <span>/</span>
+            <span>@Model.Title</span>
+        </div>
+
         <!-- Title -->
         <h1 class="manga-title">@Model.Title</h1>
         @if (!string.IsNullOrEmpty(Model.AlternativeTitle))
@@ -150,35 +185,6 @@
                 </div>
             </div>
         }
-
-        <!-- User Rating -->
-        <div class="rating-section">
-            <div class="rating-section-title">Your Rating</div>
-            @if (isSignedIn)
-            {
-                <form method="post" action="/manga/@Model.AniListId/rate" id="ratingForm">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="score" id="ratingScoreInput" value="@(Model.CurrentUserRating ?? 0)" />
-                    <div class="rating-row" id="ratingRow">
-                        @for (int i = 1; i <= 10; i++)
-                        {
-                            var isSelected = Model.CurrentUserRating == i;
-                            <button type="button"
-                                    class="rating-btn @(isSelected ? "selected" : "")"
-                                    data-score="@i"
-                                    onclick="selectRating(@i)">@i</button>
-                        }
-                    </div>
-                    <button type="submit" class="rating-submit">Save Rating</button>
-                </form>
-            }
-            else
-            {
-                <div class="rating-signin-prompt">
-                    <a href="/Identity/Account/Login">Sign in</a> to rate this manhwa.
-                </div>
-            }
-        </div>
 
         <!-- Reviews -->
         <div class="reviews-section">
@@ -255,13 +261,6 @@
 
 @section Scripts {
 <script>
-    function selectRating(score) {
-        document.getElementById('ratingScoreInput').value = score;
-        document.querySelectorAll('#ratingRow .rating-btn').forEach(btn => {
-            btn.classList.toggle('selected', parseInt(btn.dataset.score) === score);
-        });
-    }
-
     function selectReviewScore(score) {
         document.getElementById('reviewScoreInput').value = score;
         document.querySelectorAll('[data-review-score]').forEach(btn => {

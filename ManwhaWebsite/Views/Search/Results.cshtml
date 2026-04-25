@@ -1,0 +1,102 @@
+@model List<ManwhaWebsite.Models.Manhwa>
+@using ManwhaWebsite.Models
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    var query = ViewData["Query"]?.ToString() ?? "";
+    ViewData["Title"] = $"Search: {query}";
+}
+
+@section Styles {
+    <style>
+        .search-results-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: calc(var(--nav-h) + 48px) 24px 80px;
+            min-height: 100vh;
+        }
+        .search-results-header {
+            margin-bottom: 32px;
+        }
+        .search-results-title {
+            font-family: var(--font-display);
+            font-size: 36px;
+            letter-spacing: 1px;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .search-results-title .accent { color: var(--accent); }
+        .search-results-count {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .search-empty {
+            text-align: center;
+            padding: 100px 0;
+            color: var(--text-muted);
+        }
+        .search-empty-icon {
+            font-size: 56px;
+            opacity: 0.25;
+            margin-bottom: 20px;
+        }
+        .search-empty p { font-size: 18px; margin-bottom: 8px; }
+        .search-empty-hint { font-size: 14px; color: var(--text-dim); }
+        @@media (max-width: 480px) {
+            .search-results-page { padding-left: 16px; padding-right: 16px; }
+            .search-results-title { font-size: 26px; }
+        }
+    </style>
+}
+
+<div class="search-results-page">
+    <div class="search-results-header">
+        <h1 class="search-results-title">
+            Results for <span class="accent">"@query"</span>
+        </h1>
+        <p class="search-results-count">@Model.Count result@(Model.Count == 1 ? "" : "s") found</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="search-empty">
+            <div class="search-empty-icon">⌕</div>
+            <p>No manwha found for "@query"</p>
+            <p class="search-empty-hint">Try different keywords or check your spelling.</p>
+        </div>
+    }
+    else
+    {
+        <div class="updated-grid">
+            @foreach (var m in Model)
+            {
+                <a href="/manga/@m.Id" class="updated-card">
+                    <div class="updated-cover">
+                        <img src="@m.CoverImageUrl" alt="@m.Title" loading="lazy" />
+                    </div>
+                    <div class="updated-info">
+                        <div class="updated-title">@m.Title</div>
+                        @if (m.Rating > 0)
+                        {
+                            <div class="updated-chapter">★ @m.Rating.ToString("0.0")</div>
+                        }
+                        <div class="updated-time">@FormatStatus(m.Status)</div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/search.js" asp-append-version="true"></script>
+}
+
+@functions {
+    string FormatStatus(string s) => s switch
+    {
+        "FINISHED" => "Completed",
+        "RELEASING" => "Ongoing",
+        "NOT_YET_RELEASED" => "Upcoming",
+        _ => s
+    };
+}

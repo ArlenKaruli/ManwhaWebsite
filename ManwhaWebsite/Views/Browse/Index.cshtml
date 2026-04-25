@@ -1,0 +1,135 @@
+@model List<ManwhaWebsite.Models.Manhwa>
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = "Browse";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/browse.css" asp-append-version="true" />
+}
+
+<div class="browse-page">
+    <div class="browse-header">
+        <h1 class="browse-title">Browse <span class="accent">Manhwa</span></h1>
+        <p class="browse-subtitle">Discover titles by genre, status, and more</p>
+    </div>
+
+    <div class="browse-filters">
+        <div class="browse-search-wrap">
+            <span class="browse-search-icon">⌕</span>
+            <input id="browseSearch" type="text" placeholder="Search titles..." autocomplete="off" />
+        </div>
+
+        <div class="browse-genre-wrap" id="genreWrap">
+            <button class="browse-filter-btn" id="genreToggle" type="button">
+                Genres
+                <span class="browse-filter-count" id="genreCount"></span>
+                <span class="browse-filter-chevron">▾</span>
+            </button>
+            <div class="browse-genre-panel" id="genrePanel">
+                @foreach (var genre in new[] { "Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller" })
+                {
+                    <label class="genre-check">
+                        <input type="checkbox" name="genre" value="@genre" />
+                        @genre
+                    </label>
+                }
+            </div>
+        </div>
+
+        <div class="browse-status-group">
+            <button class="browse-status-btn active" data-status="" type="button">All</button>
+            <button class="browse-status-btn" data-status="RELEASING" type="button">Ongoing</button>
+            <button class="browse-status-btn" data-status="FINISHED" type="button">Completed</button>
+            <button class="browse-status-btn" data-status="NOT_YET_RELEASED" type="button">Upcoming</button>
+        </div>
+
+        <button class="browse-advanced-toggle" id="advancedToggle" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+            Advanced
+        </button>
+    </div>
+
+    <div class="browse-advanced-panel" id="advancedPanel">
+        <div class="browse-advanced-inner">
+            <div class="browse-adv-row">
+                <div class="browse-adv-field">
+                    <label for="advMinRating">Min Rating</label>
+                    <input type="number" id="advMinRating" min="0" max="10" step="0.5" placeholder="e.g. 7.5" />
+                </div>
+                <div class="browse-adv-field">
+                    <label for="advMinChapters">Min Chapters</label>
+                    <input type="number" id="advMinChapters" min="1" placeholder="e.g. 50" />
+                </div>
+                <div class="browse-adv-field">
+                    <label for="advMaxChapters">Max Chapters</label>
+                    <input type="number" id="advMaxChapters" min="1" placeholder="e.g. 200" />
+                </div>
+                <div class="browse-adv-field">
+                    <label for="advPublishedAfter">Published After</label>
+                    <input type="number" id="advPublishedAfter" min="1990" max="2026" placeholder="e.g. 2018" />
+                </div>
+                <div class="browse-adv-field">
+                    <label for="advPublishedBefore">Published Before</label>
+                    <input type="number" id="advPublishedBefore" min="1990" max="2026" placeholder="e.g. 2023" />
+                </div>
+            </div>
+            <div class="browse-adv-actions">
+                <button class="browse-adv-apply" id="advApply" type="button">Apply Filters</button>
+                <button class="browse-adv-reset" id="advReset" type="button">Reset All</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="browse-results-header">
+        <span class="browse-results-count" id="resultsCount">@Model.Count title@(Model.Count == 1 ? "" : "s")</span>
+        <span class="browse-results-note" id="resultsNote">Showing popular manhwa</span>
+    </div>
+
+    <div id="browseGrid" class="updated-grid browse-grid">
+        @foreach (var m in Model)
+        {
+            <a href="/manga/@m.Id" class="updated-card">
+                <div class="updated-cover">
+                    <img src="@m.CoverImageUrl" alt="@m.Title" loading="lazy" />
+                </div>
+                <div class="updated-info">
+                    <div class="updated-title">@m.Title</div>
+                    @if (m.Rating > 0)
+                    {
+                        <div class="updated-chapter">★ @m.Rating.ToString("0.0")</div>
+                    }
+                    <div class="updated-time">@FormatStatus(m.Status)</div>
+                </div>
+            </a>
+        }
+    </div>
+
+    <div class="browse-loadmore-wrap" id="loadMoreWrap">
+        <button class="browse-loadmore-btn" id="loadMoreBtn" type="button">Load More</button>
+    </div>
+
+    <div class="browse-loading" id="browseLoading">
+        <div class="browse-spinner"></div>
+    </div>
+
+    <div class="browse-empty" id="browseEmpty">
+        <div class="browse-empty-icon">⌕</div>
+        <p>No results found</p>
+        <p class="browse-empty-hint">Try adjusting your filters</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/browse.js" asp-append-version="true"></script>
+}
+
+@functions {
+    string FormatStatus(string s) => s switch
+    {
+        "FINISHED" => "Completed",
+        "RELEASING" => "Ongoing",
+        "NOT_YET_RELEASED" => "Upcoming",
+        _ => s ?? ""
+    };
+}

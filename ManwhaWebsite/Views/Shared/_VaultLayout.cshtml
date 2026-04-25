@@ -27,7 +27,7 @@
             <a href="/" class="nav-logo">Manhwa<span>Vault</span></a>
             <div class="nav-search">
                 <span class="nav-search-icon">⌕</span>
-                <input type="text" placeholder="Search titles, genres, authors..." />
+                <input id="navSearchInput" type="text" placeholder="Search titles, genres, authors..." autocomplete="off" />
             </div>
             <button class="nav-search-toggle" aria-label="Search" onclick="toggleMobileSearch()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -40,7 +40,7 @@
             </div>
             <div class="nav-actions">
                 <div class="nav-links">
-                    <div><a href="#">Browse</a></div>
+                    <div><a href="/Browse">Browse</a></div>
                     <div><a href="#">Genres</a></div>
                     <div><a href="#">Rankings</a></div>
                     <div><a href="#">Latest</a></div>
@@ -97,7 +97,7 @@
             <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:12px;">
                 Manhwa<span style="color:var(--accent)">Vault</span>
             </div>
-            <a href="#">Browse</a>
+            <a href="/Browse">Browse</a>
             <a href="#">Genres</a>
             <a href="#">Rankings</a>
             <a href="#">Latest</a>
@@ -144,6 +144,7 @@
             }
         });
     </script>
+    <script src="~/js/search.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

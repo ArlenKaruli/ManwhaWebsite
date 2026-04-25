@@ -21,6 +21,21 @@ namespace ManwhaWebsite.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> RandomDiscover()
+        {
+            var items = await _aniList.GetDiscoverAsync();
+            return Json(items.Select(m => new
+            {
+                id = m.Id,
+                title = m.Title,
+                description = m.Description,
+                cover = m.CoverImageUrl,
+                score = m.Rating,
+                popularity = m.Popularity,
+            }));
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
