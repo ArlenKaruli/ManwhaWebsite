@@ -1,0 +1,112 @@
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ManhwaVault — Service Unavailable</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0d0d0d;
+            color: #e8e8e8;
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.05em;
+            color: #e8e8e8;
+            text-decoration: none;
+            margin-bottom: 3rem;
+        }
+
+        .logo span { color: #c0392b; }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.6;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            letter-spacing: 0.04em;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.05rem;
+            font-weight: 300;
+            color: #aaa;
+            max-width: 480px;
+            line-height: 1.7;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtext {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 2rem;
+        }
+
+        .divider {
+            width: 48px;
+            height: 2px;
+            background: #c0392b;
+            margin: 1.5rem auto;
+            border-radius: 2px;
+        }
+
+        .retry-btn {
+            display: inline-block;
+            margin-top: 2.5rem;
+            padding: 0.7rem 2rem;
+            background: transparent;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #ccc;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .retry-btn:hover {
+            border-color: #c0392b;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="logo">Manhwa<span>Vault</span></a>
+
+    <div class="icon">⚠</div>
+
+    <h1>We'll Be Right Back</h1>
+
+    <div class="divider"></div>
+
+    <p>ManhwaVault is temporarily unavailable. Our data provider appears to be unreachable right now.</p>
+    <p>We're sorry for the inconvenience — please try again in a few minutes.</p>
+
+    <a href="/" class="retry-btn">Try Again</a>
+
+    <p class="subtext">If the problem persists, the issue is likely on our end and we're already working on it.</p>
+</body>
+</html>

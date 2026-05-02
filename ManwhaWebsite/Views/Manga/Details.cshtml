@@ -7,10 +7,12 @@
     ViewData["Title"] = Model.Title;
     var bgUrl = Model.BannerImageUrl ?? Model.CoverImageUrl;
     var isSignedIn = SignInManager.IsSignedIn(User);
+    var currentStatus = Model.CurrentUserReadingStatus;
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/manga-detail.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/reading-list.css" asp-append-version="true" />
 }
 
 <!-- BANNER -->
@@ -103,13 +105,10 @@
                     <span class="manga-stat-label">Status</span>
                     <span class="manga-stat-value">@FormatStatus(Model.Status)</span>
                 </div>
-                @if (Model.Chapters.HasValue)
-                {
-                    <div class="manga-stat-row">
-                        <span class="manga-stat-label">Chapters</span>
-                        <span class="manga-stat-value">@Model.Chapters</span>
-                    </div>
-                }
+                <div class="manga-stat-row">
+                    <span class="manga-stat-label">Chapters</span>
+                    <span class="manga-stat-value">@(Model.Chapters.HasValue ? Model.Chapters.ToString() : "?")</span>
+                </div>
                 @if (Model.Volumes.HasValue)
                 {
                     <div class="manga-stat-row">
@@ -125,6 +124,7 @@
                     </div>
                 }
             </div>
+
         </div>
     </aside>
 
@@ -153,6 +153,90 @@
                     <span class="genre-pill">@genre</span>
                 }
             </div>
+        }
+
+        <!-- ADD TO LIST -->
+        @{
+            string StatusLabel(ReadingStatus s) => s switch
+            {
+                ReadingStatus.Reading    => "Reading",
+                ReadingStatus.Completed  => "Completed",
+                ReadingStatus.PlanToRead => "Plan to Read",
+                ReadingStatus.Dropped    => "Dropped",
+                _                        => ""
+            };
+            string StatusIcon(ReadingStatus s) => s switch
+            {
+                ReadingStatus.Reading    => "📖",
+                ReadingStatus.Completed  => "✓",
+                ReadingStatus.PlanToRead => "🔖",
+                ReadingStatus.Dropped    => "✕",
+                _                        => ""
+            };
+            var btnLabel = currentStatus.HasValue ? StatusLabel(currentStatus.Value) : "Add to List";
+        }
+        @if (isSignedIn)
+        {
+            <div class="atl-dropdown" id="atlDropdown">
+                <button class="atl-trigger @(currentStatus.HasValue ? "atl-trigger--active" : "")" onclick="toggleAtl(event)" type="button">
+                    @if (currentStatus.HasValue)
+                    {
+                        <span class="atl-trigger-icon">@StatusIcon(currentStatus.Value)</span>
+                    }
+                    else
+                    {
+                        <svg class="atl-plus" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    }
+                    @btnLabel
+                    <svg class="atl-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <div class="atl-menu" id="atlMenu" role="menu">
+                    <form method="post" action="/ReadingList/Add">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="aniListId" value="@Model.AniListId" />
+                        <input type="hidden" name="title" value="@Model.Title" />
+                        <input type="hidden" name="coverImageUrl" value="@Model.CoverImageUrl" />
+                        @if (Model.Chapters.HasValue) { <input type="hidden" name="chapters" value="@Model.Chapters" /> }
+                        <input type="hidden" name="returnUrl" value="/manga/@Model.AniListId" />
+                        <button type="submit" name="status" value="0" class="atl-option @(currentStatus == ReadingStatus.Reading ? "atl-option--active" : "")" role="menuitem">
+                            <span class="atl-option-dot atl-dot-reading"></span>Reading
+                            @if (currentStatus == ReadingStatus.Reading) { <span class="atl-check">✓</span> }
+                        </button>
+                        @if (Model.Chapters.HasValue)
+                        {
+                        <button type="submit" name="status" value="1" class="atl-option @(currentStatus == ReadingStatus.Completed ? "atl-option--active" : "")" role="menuitem">
+                            <span class="atl-option-dot atl-dot-completed"></span>Completed
+                            @if (currentStatus == ReadingStatus.Completed) { <span class="atl-check">✓</span> }
+                        </button>
+                        }
+                        <button type="submit" name="status" value="2" class="atl-option @(currentStatus == ReadingStatus.PlanToRead ? "atl-option--active" : "")" role="menuitem">
+                            <span class="atl-option-dot atl-dot-plantoread"></span>Plan to Read
+                            @if (currentStatus == ReadingStatus.PlanToRead) { <span class="atl-check">✓</span> }
+                        </button>
+                        <button type="submit" name="status" value="3" class="atl-option @(currentStatus == ReadingStatus.Dropped ? "atl-option--active" : "")" role="menuitem">
+                            <span class="atl-option-dot atl-dot-dropped"></span>Dropped
+                            @if (currentStatus == ReadingStatus.Dropped) { <span class="atl-check">✓</span> }
+                        </button>
+                    </form>
+                    @if (currentStatus.HasValue)
+                    {
+                        <div class="atl-menu-divider"></div>
+                        <form method="post" action="/ReadingList/Remove">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="aniListId" value="@Model.AniListId" />
+                            <input type="hidden" name="returnUrl" value="/manga/@Model.AniListId" />
+                            <button type="submit" class="atl-option atl-option--remove" role="menuitem">Remove from list</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <a href="/Identity/Account/Login" class="atl-trigger atl-trigger--guest">
+                <svg class="atl-plus" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                Add to List
+            </a>
         }
 
         <!-- Synopsis -->
@@ -267,6 +351,15 @@
             btn.classList.toggle('selected', parseInt(btn.dataset.reviewScore) === score);
         });
     }
+    function toggleAtl(e) {
+        e.stopPropagation();
+        const dd = document.getElementById('atlDropdown');
+        dd.classList.toggle('open');
+    }
+    document.addEventListener('click', function (e) {
+        const dd = document.getElementById('atlDropdown');
+        if (dd && !dd.contains(e.target)) dd.classList.remove('open');
+    });
 </script>
 }
 

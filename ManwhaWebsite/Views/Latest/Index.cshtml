@@ -1,0 +1,150 @@
+@model List<ManwhaWebsite.Models.Manhwa>
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = "Latest Updates";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/browse.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/latest.css" asp-append-version="true" />
+}
+
+<div class="browse-page">
+    <div class="browse-header">
+        <h1 class="browse-title">Latest <span class="accent">Updates</span></h1>
+        <p class="browse-subtitle">Manhwa sorted by most recently updated</p>
+    </div>
+
+    <div class="browse-results-header">
+        <span class="browse-results-count" id="resultsCount">@Model.Count titles</span>
+        <span class="browse-results-note" id="resultsNote">Page 1</span>
+    </div>
+
+    <div id="latestGrid" class="updated-grid browse-grid">
+        @foreach (var m in Model)
+        {
+            var isNew = (DateTime.UtcNow - m.LastUpdated).TotalHours < 24;
+            <a href="/manga/@m.Id" class="updated-card">
+                <div class="updated-cover">
+                    <img src="@m.CoverImageUrl" alt="@m.Title" loading="lazy" />
+                    @if (isNew)
+                    {
+                        <div class="updated-cover-badge"><span class="badge badge-new">New</span></div>
+                    }
+                </div>
+                <div class="updated-info">
+                    <div class="updated-title">@m.Title</div>
+                    <div class="updated-chapter">@(m.LatestChapter ?? FormatStatus(m.Status))</div>
+                    <div class="updated-time">@GetTimeAgo(m.LastUpdated)</div>
+                </div>
+            </a>
+        }
+    </div>
+
+    <div class="browse-loadmore-wrap" id="loadMoreWrap">
+        <button class="browse-loadmore-btn" id="loadMoreBtn" type="button">Load More</button>
+    </div>
+
+    <div class="browse-loading" id="browseLoading">
+        <div class="browse-spinner"></div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let currentPage = 1;
+    let loading = false;
+
+    document.getElementById('loadMoreBtn').addEventListener('click', loadMore);
+
+    async function loadMore() {
+        if (loading) return;
+        loading = true;
+        currentPage++;
+
+        const btn = document.getElementById('loadMoreBtn');
+        const spinner = document.getElementById('browseLoading');
+        btn.style.display = 'none';
+        spinner.style.display = 'flex';
+
+        try {
+            const res = await fetch(`/Latest/LoadMore?page=${currentPage}`);
+            const items = await res.json();
+
+            if (!items.length) {
+                document.getElementById('loadMoreWrap').style.display = 'none';
+                spinner.style.display = 'none';
+                loading = false;
+                return;
+            }
+
+            const grid = document.getElementById('latestGrid');
+            items.forEach(m => {
+                const isNew = (Date.now() / 1000 - m.updatedAt) < 86400;
+                const badge = isNew ? `<div class="updated-cover-badge"><span class="badge badge-new">New</span></div>` : '';
+                const chap = m.chapter || formatStatus(m.status);
+                const timeAgo = getTimeAgo(m.updatedAt);
+                grid.insertAdjacentHTML('beforeend', `
+                    <a href="/manga/${m.id}" class="updated-card">
+                        <div class="updated-cover">
+                            <img src="${m.cover}" alt="${escHtml(m.title)}" loading="lazy" />
+                            ${badge}
+                        </div>
+                        <div class="updated-info">
+                            <div class="updated-title">${escHtml(m.title)}</div>
+                            <div class="updated-chapter">${escHtml(chap)}</div>
+                            <div class="updated-time">${timeAgo}</div>
+                        </div>
+                    </a>`);
+            });
+
+            const count = document.getElementById('resultsCount');
+            const total = grid.querySelectorAll('.updated-card').length;
+            count.textContent = `${total} titles`;
+            document.getElementById('resultsNote').textContent = `Page ${currentPage}`;
+        } catch {
+            currentPage--;
+        }
+
+        spinner.style.display = 'none';
+        btn.style.display = '';
+        loading = false;
+    }
+
+    function formatStatus(s) {
+        const map = { FINISHED: 'Completed', RELEASING: 'Ongoing', NOT_YET_RELEASED: 'Upcoming' };
+        return map[s] || s || '';
+    }
+
+    function getTimeAgo(unixSec) {
+        const diff = Date.now() / 1000 - unixSec;
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+        return new Date(unixSec * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function escHtml(s) {
+        return (s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+</script>
+}
+
+@functions {
+    string FormatStatus(string s) => s switch
+    {
+        "FINISHED" => "Completed",
+        "RELEASING" => "Ongoing",
+        "NOT_YET_RELEASED" => "Upcoming",
+        _ => s ?? ""
+    };
+
+    string GetTimeAgo(DateTime dt)
+    {
+        var span = DateTime.UtcNow - dt;
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours}h ago";
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays}d ago";
+        return dt.ToString("MMM dd");
+    }
+}

@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     var _homePic = SignInManager.IsSignedIn(User) ? (await UserManager.GetUserAsync(User))?.ProfilePictureUrl : null;
 }
@@ -39,9 +40,9 @@
             <div class="nav-actions">
                 <div class="nav-links">
                     <div><a href="/Browse">Browse</a></div>
-                    <div><a href="#">Genres</a></div>
-                    <div><a href="#">Rankings</a></div>
-                    <div><a href="#">Latest</a></div>
+                    <div><a href="/Popular">Popular</a></div>
+                    <div><a href="/Rankings">Rankings</a></div>
+                    <div><a href="/Latest">Latest</a></div>
                 </div>
                 <div class="nav-right">
                     @if (SignInManager.IsSignedIn(User))
@@ -64,13 +65,13 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
                                     My Profile
                                 </a>
+                                <a href="/ReadingList" class="nav-account-menu-item" role="menuitem">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-6 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm4 13H8v-.9c0-2 4-3.1 6-3.1s6 1.1 6 3.1V18z"/></svg>
+                                    My Reading List
+                                </a>
                                 <a href="/Identity/Account/Manage/ChangePassword" class="nav-account-menu-item" role="menuitem">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.01 7.01 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.47.47 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.37 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.47.47 0 0 0-.12-.61l-2.03-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>
                                     Account Settings
-                                </a>
-                                <a href="#" class="nav-account-menu-item" role="menuitem">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-                                    Notifications
                                 </a>
                                 <div class="nav-account-menu-divider"></div>
                                 <form method="post" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
@@ -100,16 +101,11 @@
                 Manhwa<span style="color:var(--accent)">Vault</span>
             </div>
             <a href="/Browse">Browse</a>
-            <a href="#">Genres</a>
-            <a href="#">Rankings</a>
-            <a href="#">Latest</a>
+            <a href="/Popular">Popular</a>
+            <a href="/Rankings">Rankings</a>
+            <a href="/Latest">Latest</a>
             <hr style="border-color:var(--border);margin:8px 0" />
-            @if (SignInManager.IsSignedIn(User))
-            {
-                <a href="/Identity/Account/Manage">My Profile</a>
-                <a href="/Identity/Account/Manage/ChangePassword">Account Settings</a>
-            }
-            else
+            @if (!SignInManager.IsSignedIn(User))
             {
                 <a href="/Identity/Account/Login">Sign In</a>
                 <a href="/Identity/Account/Register">Join Free</a>
@@ -188,7 +184,7 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">🔥 <span>Popular</span></h2>
-                <a href="#" class="view-all">View All →</a>
+                <a href="/Popular" class="view-all">View All →</a>
             </div>
             <div class="scroll-row-wrapper">
                 <button class="scroll-btn scroll-btn-left" onclick="scrollRow('popularRow',-1)">‹</button>
@@ -198,7 +194,7 @@
                     }
                     @foreach (var item in Model.Popular)
                     {
-                        <div class="card">
+                        <a href="/manga/@item.Id" class="card">
                             <div class="card-cover">
                                 <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
                             </div>
@@ -209,7 +205,7 @@
                                     <span class="card-views">@FormatNum(item.Popularity)</span>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                         popIdx++;
                     }
                 </div>
@@ -238,22 +234,37 @@
             </div>
             @if (SignInManager.IsSignedIn(User))
             {
+                <input type="hidden" id="rec-token" value="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
                 <div class="scroll-row-wrapper">
                     <button class="scroll-btn scroll-btn-left" onclick="scrollRow('recommendedRow',-1)">‹</button>
                     <div class="scroll-row" id="recommendedRow" data-base-count="15">
-                        @foreach (var item in Model.Popular)
+                        @foreach (var item in Model.Recommendations)
                         {
-                            <div class="card">
-                                <div class="card-cover">
-                                    <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
-                                </div>
-                                <div class="card-info">
-                                    <div class="card-title">@item.Title</div>
-                                    <div class="card-meta">
-                                        <span class="card-rating">@item.Rating.ToString("F1")</span>
-                                        <span class="card-views">@FormatNum(item.Popularity)</span>
+                            <div class="rec-card-wrapper" style="flex-shrink:0">
+                                <a href="/manga/@item.Id" class="card">
+                                    <div class="card-cover">
+                                        <img src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
+                                        <div class="card-overlay">
+                                            <div class="card-overlay-read"
+                                                 role="button" tabindex="0"
+                                                 data-anilist-id="@item.Id"
+                                                 data-title="@item.Title"
+                                                 data-cover="@item.CoverImageUrl"
+                                                 data-status="@(item.ChapterCount != null ? "Completed" : "Reading")"
+                                                 onclick="markRead(event, this)"
+                                                 onkeydown="if(event.key==='Enter'||event.key===' ')markRead(event,this)">
+                                                @(item.ChapterCount != null ? "Already Read" : "Currently Reading")
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                    <div class="card-info">
+                                        <div class="card-title">@item.Title</div>
+                                        <div class="card-meta">
+                                            <span class="card-rating">@item.Rating.ToString("F1")</span>
+                                            <span class="card-views">@FormatNum(item.Popularity)</span>
+                                        </div>
+                                    </div>
+                                </a>
                             </div>
                         }
                     </div>
@@ -277,7 +288,7 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">🆕 <span>Newly</span> Updated</h2>
-                <a href="#" class="view-all">View All →</a>
+                <a href="/Latest" class="view-all">View All →</a>
             </div>
             <div class="updated-grid" data-base-count="9">
                 @foreach (var item in Model.NewlyUpdated)
@@ -347,9 +358,8 @@
                     </div>
                     <p>Your ultimate destination for manhwa, manhua, and manga. Track your list, discover new titles, and connect with the community.</p>
                 </div>
-                <div class="footer-col"><h4>Browse</h4><ul><li><a href="#">Popular</a></li><li><a href="#">Latest</a></li><li><a href="#">Rankings</a></li><li><a href="#">Genres</a></li></ul></div>
-                <div class="footer-col"><h4>Account</h4><ul><li><a href="#">Sign Up</a></li><li><a href="#">Login</a></li><li><a href="#">Reading List</a></li><li><a href="#">Settings</a></li></ul></div>
-                <div class="footer-col"><h4>Info</h4><ul><li><a href="#">About</a></li><li><a href="#">Contact</a></li><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul></div>
+                <div class="footer-col"><h4>Browse</h4><ul><li><a href="/Browse">Browse</a></li><li><a href="/Popular">Popular</a></li><li><a href="/Rankings">Rankings</a></li><li><a href="/Latest">Latest</a></li></ul></div>
+                <div class="footer-col"><h4>Info</h4><ul><li><a href="/Static/About">About</a></li><li><a href="/Static/Contact">Contact</a></li><li><a href="/Static/Privacy">Privacy</a></li><li><a href="/Static/Terms">Terms</a></li></ul></div>
             </div>
             <div class="footer-bottom">
                 <span>© @DateTime.Now.Year ManhwaVault. All rights reserved.</span>
@@ -520,6 +530,44 @@
             if (!hint) return;
             hint.classList.add('recommended-hint--dismissed');
             hint.addEventListener('animationend', () => hint.style.display = 'none', { once: true });
+        }
+
+        function markRead(event, el) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const wrapper = el.closest('.rec-card-wrapper');
+            const token = document.getElementById('rec-token').value;
+
+            el.textContent = '…';
+            el.style.pointerEvents = 'none';
+
+            const body = new URLSearchParams({
+                aniListId: el.dataset.anilistId,
+                title: el.dataset.title,
+                coverImageUrl: el.dataset.cover,
+                status: el.dataset.status,
+                __RequestVerificationToken: token
+            });
+
+            fetch('/ReadingList/MarkStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString()
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    wrapper.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    wrapper.style.opacity = '0';
+                    wrapper.style.transform = 'scale(0.9)';
+                    setTimeout(() => wrapper.remove(), 320);
+                }
+            })
+            .catch(() => {
+                el.textContent = 'Already Read';
+                el.style.pointerEvents = '';
+            });
         }
 
         // Scroll reveal

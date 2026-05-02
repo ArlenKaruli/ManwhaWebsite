@@ -1,0 +1,106 @@
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = "Privacy Policy";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/static-pages.css" asp-append-version="true" />
+}
+
+<div class="static-page">
+
+    <a href="/" class="static-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        Back to Home
+    </a>
+
+    <div class="static-hero">
+        <span class="static-hero-label">Legal</span>
+        <h1>Privacy Policy</h1>
+        <p>We take your privacy seriously. This policy explains what data we collect, how we use it, and how you can control it.</p>
+    </div>
+
+    <p class="static-last-updated">Last updated: April 30, 2026</p>
+
+    <div class="static-legal-block">
+        <h3>1. Information We Collect</h3>
+        <p>When you create an account or use ManhwaVault, we may collect:</p>
+        <ul>
+            <li>Email address and username (required for registration)</li>
+            <li>Profile picture (optional, uploaded by you)</li>
+            <li>Reading list entries and preferences</li>
+            <li>Browser type, device type, and general location (country-level) via standard server logs</li>
+        </ul>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>2. How We Use Your Information</h3>
+        <p>We use your information solely to provide and improve ManhwaVault:</p>
+        <ul>
+            <li>To authenticate you and keep your account secure</li>
+            <li>To save and display your reading list and preferences</li>
+            <li>To send transactional emails (e.g. email verification, password reset)</li>
+            <li>To generate anonymous usage statistics to improve the site</li>
+        </ul>
+        <p style="margin-top:12px;">We do <strong>not</strong> sell your data to third parties.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>3. Cookies</h3>
+        <p>ManhwaVault uses session cookies to keep you logged in between visits. We do not use advertising or tracking cookies from third parties. The AniList API is called server-side; no AniList cookies are set in your browser.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>4. Data Storage &amp; Security</h3>
+        <p>Your data is stored in a secured SQL Server database. Passwords are never stored in plain text — they are hashed using ASP.NET Core Identity's built-in BCrypt-based algorithm. We apply TLS to all connections between your browser and our servers.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>5. Third-Party Services</h3>
+        <ul>
+            <li><strong>AniList API</strong> — title data, cover art, and scores. No personal data is shared with AniList.</li>
+            <li><strong>Google Fonts</strong> — fonts are loaded from Google's CDN, which may log your IP address per their own privacy policy.</li>
+            <li><strong>SMTP Provider</strong> — used to deliver verification and password-reset emails. Only your email address is passed.</li>
+        </ul>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>6. Your Rights</h3>
+        <p>You have the right to access, correct, or delete your personal data at any time. To request account deletion or a data export, email us at <a href="mailto:legal@manhwavault.com" style="color:var(--accent)">legal@@manhwavault.com</a>. We will respond within 5 business days.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>7. Children's Privacy</h3>
+        <p>ManhwaVault is not directed at children under 13. We do not knowingly collect personal information from anyone under 13. If you believe a child has created an account, please contact us and we will remove it promptly.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>8. Changes to This Policy</h3>
+        <p>We may update this policy from time to time. When we do, we will revise the "Last updated" date at the top. Continued use of the site after changes constitutes your acceptance of the revised policy.</p>
+    </div>
+
+    <div class="static-section" style="margin-top:40px;">
+        <h2>Questions?</h2>
+        <p>If you have any questions about this privacy policy, please <a href="/Static/Contact" style="color:var(--accent)">contact us</a>.</p>
+    </div>
+
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;">
+                    Manhwa<span style="color:var(--accent)">Vault</span>
+                </div>
+                <p>Your ultimate destination for manhwa, manhua, and manga. Track your list, discover new titles, and connect with the community.</p>
+            </div>
+            <div class="footer-col"><h4>Browse</h4><ul><li><a href="/Browse">Browse</a></li><li><a href="/Popular">Popular</a></li><li><a href="/Rankings">Rankings</a></li><li><a href="/Latest">Latest</a></li></ul></div>
+            <div class="footer-col"><h4>Info</h4><ul><li><a href="/Static/About">About</a></li><li><a href="/Static/Contact">Contact</a></li><li><a href="/Static/Privacy">Privacy</a></li><li><a href="/Static/Terms">Terms</a></li></ul></div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; @DateTime.Now.Year ManhwaVault. All rights reserved.</span>
+            <span>Made for readers, by readers.</span>
+        </div>
+    </div>
+</footer>

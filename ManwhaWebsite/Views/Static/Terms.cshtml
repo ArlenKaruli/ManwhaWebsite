@@ -1,0 +1,106 @@
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = "Terms of Service";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/static-pages.css" asp-append-version="true" />
+}
+
+<div class="static-page">
+
+    <a href="/" class="static-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        Back to Home
+    </a>
+
+    <div class="static-hero">
+        <span class="static-hero-label">Legal</span>
+        <h1>Terms of Service</h1>
+        <p>By using ManhwaVault you agree to these terms. Please read them carefully.</p>
+    </div>
+
+    <p class="static-last-updated">Last updated: April 30, 2026</p>
+
+    <div class="static-legal-block">
+        <h3>1. Acceptance of Terms</h3>
+        <p>By accessing or using ManhwaVault ("the Site"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the Site. We reserve the right to modify these terms at any time; continued use of the Site constitutes acceptance of the updated terms.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>2. Eligibility</h3>
+        <p>You must be at least 13 years old to create an account or use ManhwaVault. By using the Site you represent that you meet this requirement. Users under 18 should review these terms with a parent or guardian.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>3. User Accounts</h3>
+        <ul>
+            <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
+            <li>You must provide a valid email address during registration.</li>
+            <li>You may not share your account with others or create multiple accounts to circumvent any restrictions.</li>
+            <li>We reserve the right to suspend or terminate accounts that violate these terms.</li>
+        </ul>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>4. Acceptable Use</h3>
+        <p>You agree not to:</p>
+        <ul>
+            <li>Attempt to gain unauthorised access to any part of the Site or its underlying systems</li>
+            <li>Scrape, harvest, or automate requests to the Site in a way that disrupts service</li>
+            <li>Upload malicious content, spam, or content that violates applicable law</li>
+            <li>Impersonate other users or ManhwaVault staff</li>
+            <li>Use the Site for any commercial purpose without our prior written consent</li>
+        </ul>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>5. Intellectual Property</h3>
+        <p>All title data, cover art, and scores displayed on ManhwaVault are sourced from AniList and remain the property of their respective rights holders. ManhwaVault's original design, code, and branding are our intellectual property. You may not reproduce them without permission.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>6. User-Generated Content</h3>
+        <p>By uploading a profile picture or any other content to ManhwaVault, you grant us a non-exclusive, royalty-free licence to display that content on the Site. You retain ownership of your content and may remove it at any time via your account settings. You are solely responsible for ensuring your content does not infringe third-party rights.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>7. Disclaimer of Warranties</h3>
+        <p>ManhwaVault is provided "as is" without warranties of any kind, express or implied. We do not guarantee uninterrupted access, accuracy of third-party data, or fitness for a particular purpose. Use the Site at your own risk.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>8. Limitation of Liability</h3>
+        <p>To the fullest extent permitted by law, ManhwaVault and its operators shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the Site, even if we have been advised of the possibility of such damages.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>9. Governing Law</h3>
+        <p>These terms are governed by and construed in accordance with applicable law. Any disputes shall be resolved through good-faith negotiation; if that fails, through binding arbitration or the courts of the applicable jurisdiction.</p>
+    </div>
+
+    <div class="static-legal-block">
+        <h3>10. Contact</h3>
+        <p>Questions about these terms? <a href="/Static/Contact" style="color:var(--accent)">Contact us</a> or email <a href="mailto:legal@manhwavault.com" style="color:var(--accent)">legal@@manhwavault.com</a>.</p>
+    </div>
+
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;">
+                    Manhwa<span style="color:var(--accent)">Vault</span>
+                </div>
+                <p>Your ultimate destination for manhwa, manhua, and manga. Track your list, discover new titles, and connect with the community.</p>
+            </div>
+            <div class="footer-col"><h4>Browse</h4><ul><li><a href="/Browse">Browse</a></li><li><a href="/Popular">Popular</a></li><li><a href="/Rankings">Rankings</a></li><li><a href="/Latest">Latest</a></li></ul></div>
+            <div class="footer-col"><h4>Info</h4><ul><li><a href="/Static/About">About</a></li><li><a href="/Static/Contact">Contact</a></li><li><a href="/Static/Privacy">Privacy</a></li><li><a href="/Static/Terms">Terms</a></li></ul></div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; @DateTime.Now.Year ManhwaVault. All rights reserved.</span>
+            <span>Made for readers, by readers.</span>
+        </div>
+    </div>
+</footer>

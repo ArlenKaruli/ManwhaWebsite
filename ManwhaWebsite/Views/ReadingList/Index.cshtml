@@ -1,0 +1,295 @@
+@model ManwhaWebsite.Models.ReadingListViewModel
+@using ManwhaWebsite.Models
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = "My Reading List";
+
+    string FilterUrl(string f) => Url.Action("Index", "ReadingList", new { filter = f })!;
+
+    string StatusClass(ReadingStatus s) => s switch
+    {
+        ReadingStatus.Reading    => "reading",
+        ReadingStatus.Completed  => "completed",
+        ReadingStatus.PlanToRead => "plantoread",
+        ReadingStatus.Dropped    => "dropped",
+        _                        => ""
+    };
+
+    string StatusLabel(ReadingStatus s) => s switch
+    {
+        ReadingStatus.Reading    => "Reading",
+        ReadingStatus.Completed  => "Completed",
+        ReadingStatus.PlanToRead => "Plan to Read",
+        ReadingStatus.Dropped    => "Dropped",
+        _                        => ""
+    };
+
+    string FormatDate(DateTime d) => d.ToString("MMM d, yyyy");
+
+    var mobileSections = new[]
+    {
+        (ReadingStatus.Reading,    "Reading",      "reading"),
+        (ReadingStatus.Completed,  "Completed",    "completed"),
+        (ReadingStatus.PlanToRead, "Plan to Read", "plantoread"),
+        (ReadingStatus.Dropped,    "Dropped",      "dropped"),
+    };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/reading-list.css" asp-append-version="true" />
+}
+
+<div class="rl-page">
+
+    <!-- ── Header (shared) ── -->
+    <div class="rl-header">
+        <div class="rl-header-inner">
+            <div class="rl-username">@Model.DisplayName<span>'s List</span></div>
+        </div>
+        <div class="rl-header-inner" style="padding-bottom:0;">
+            <div class="rl-stats" id="rl-stats">
+                <a href="@FilterUrl("all")" class="rl-stat @(Model.ShowAll ? "active" : "")" data-idx="-1">
+                    <span class="rl-stat-num">@Model.TotalCount</span>All
+                </a>
+                <a href="@FilterUrl("Reading")" class="rl-stat reading @(!Model.ShowAll && Model.ActiveFilter == ReadingStatus.Reading ? "active" : "")" data-idx="0">
+                    <span class="rl-stat-num">@Model.ReadingCount</span>Reading
+                </a>
+                <a href="@FilterUrl("Completed")" class="rl-stat completed @(!Model.ShowAll && Model.ActiveFilter == ReadingStatus.Completed ? "active" : "")" data-idx="1">
+                    <span class="rl-stat-num">@Model.CompletedCount</span>Completed
+                </a>
+                <a href="@FilterUrl("PlanToRead")" class="rl-stat plantoread @(!Model.ShowAll && Model.ActiveFilter == ReadingStatus.PlanToRead ? "active" : "")" data-idx="2">
+                    <span class="rl-stat-num">@Model.PlanToReadCount</span>Plan to Read
+                </a>
+                <a href="@FilterUrl("Dropped")" class="rl-stat dropped @(!Model.ShowAll && Model.ActiveFilter == ReadingStatus.Dropped ? "active" : "")" data-idx="3">
+                    <span class="rl-stat-num">@Model.DroppedCount</span>Dropped
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Desktop layout ── -->
+    <div class="rl-content rl-desktop-only">
+        @if (!Model.Entries.Any())
+        {
+            <div class="rl-empty">
+                <div class="rl-empty-icon">📚</div>
+                <p>Nothing here yet. Start adding manhwa to your list!</p>
+                <a href="/Browse">Browse Manhwa</a>
+            </div>
+        }
+        else
+        {
+            <table class="rl-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th class="col-score">Score</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-date">Added</th>
+                        <th class="col-actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Entries.Count; i++)
+                    {
+                        var entry = Model.Entries[i];
+                        var sc = StatusClass(entry.Status);
+                        <tr>
+                            <td style="color:var(--muted);font-size:0.8rem;width:36px;">@(i + 1)</td>
+                            <td class="col-title">
+                                <div class="rl-title-cell">
+                                    <img class="rl-cover" src="@entry.CoverImageUrl" alt="@entry.Title" loading="lazy" />
+                                    <div class="rl-title-text">
+                                        <a class="rl-title-link" href="/manga/@entry.AniListId">@entry.Title</a>
+                                        @if (entry.Chapters.HasValue)
+                                        {
+                                            <div class="rl-chapters">@entry.Chapters ch.</div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-score">
+                                <span class="rl-score none">—</span>
+                            </td>
+                            <td class="col-status">
+                                <span class="rl-status-badge @sc">@StatusLabel(entry.Status)</span>
+                            </td>
+                            <td class="col-date">
+                                <span class="rl-date">@FormatDate(entry.AddedAt)</span>
+                            </td>
+                            <td class="col-actions">
+                                <form method="post" action="/ReadingList/Remove" class="rl-actions-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="aniListId" value="@entry.AniListId" />
+                                    <input type="hidden" name="returnUrl" value="/ReadingList" />
+                                    <button type="submit" class="rl-btn-remove" title="Remove from list" onclick="return confirm('Remove from your list?')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <!-- ── Mobile layout ── -->
+    <div class="rl-mobile-only">
+        @if (Model.TotalCount == 0)
+        {
+            <div class="rl-empty">
+                <div class="rl-empty-icon">📚</div>
+                <p>Nothing here yet. Start adding manhwa to your list!</p>
+                <a href="/Browse">Browse Manhwa</a>
+            </div>
+        }
+        else
+        {
+            <!-- All view: flat vertical list shown when "All" tab is tapped -->
+            <div class="rl-all-view" id="rl-all-view">
+                <div class="rl-cards">
+                    @foreach (var (status, label, cls) in mobileSections)
+                    {
+                        foreach (var entry in Model.GroupedEntries.GetValueOrDefault(status, new()))
+                        {
+                            <div class="rl-card">
+                                <a href="/manga/@entry.AniListId" class="rl-card-cover-wrap">
+                                    <img class="rl-card-cover" src="@entry.CoverImageUrl" alt="@entry.Title" loading="lazy" />
+                                </a>
+                                <div class="rl-card-body">
+                                    <a class="rl-card-title" href="/manga/@entry.AniListId">@entry.Title</a>
+                                    <div class="rl-card-meta">
+                                        <span class="rl-card-dot @cls"></span>
+                                        <span>@label</span>
+                                        @if (entry.Chapters.HasValue)
+                                        {
+                                            <span class="rl-sep"> · </span><span>@entry.Chapters ch.</span>
+                                        }
+                                    </div>
+                                </div>
+                                <form method="post" action="/ReadingList/Remove">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="aniListId" value="@entry.AniListId" />
+                                    <input type="hidden" name="returnUrl" value="/ReadingList" />
+                                    <button type="submit" class="rl-btn-remove" title="Remove" onclick="return confirm('Remove from your list?')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Sections scroll view -->
+            <div class="rl-sections-container" id="rl-sections">
+                @foreach (var (status, label, cls) in mobileSections)
+                {
+                    var entries = Model.GroupedEntries.GetValueOrDefault(status, new());
+                    <section class="rl-section" id="section-@cls">
+                        <div class="rl-section-hd">
+                            <span class="rl-section-dot @cls"></span>
+                            <span class="rl-section-name">@label</span>
+                            <span class="rl-section-count">@entries.Count</span>
+                        </div>
+                        @if (!entries.Any())
+                        {
+                            <div class="rl-section-empty">Nothing here yet.</div>
+                        }
+                        else
+                        {
+                            <div class="rl-cards">
+                                @foreach (var entry in entries)
+                                {
+                                    <div class="rl-card">
+                                        <a href="/manga/@entry.AniListId" class="rl-card-cover-wrap">
+                                            <img class="rl-card-cover" src="@entry.CoverImageUrl" alt="@entry.Title" loading="lazy" />
+                                        </a>
+                                        <div class="rl-card-body">
+                                            <a class="rl-card-title" href="/manga/@entry.AniListId">@entry.Title</a>
+                                            <div class="rl-card-meta">
+                                                @if (entry.Chapters.HasValue)
+                                                {
+                                                    <span>@entry.Chapters ch.</span><span class="rl-sep"> · </span>
+                                                }
+                                                <span>@FormatDate(entry.AddedAt)</span>
+                                            </div>
+                                        </div>
+                                        <form method="post" action="/ReadingList/Remove">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="aniListId" value="@entry.AniListId" />
+                                            <input type="hidden" name="returnUrl" value="/ReadingList" />
+                                            <button type="submit" class="rl-btn-remove" title="Remove" onclick="return confirm('Remove from your list?')">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </section>
+                }
+            </div>
+        }
+    </div>
+
+</div>
+
+<script>
+(function () {
+    var sectionsEl = document.getElementById('rl-sections');
+    var allView    = document.getElementById('rl-all-view');
+    var stats      = Array.from(document.querySelectorAll('.rl-stat[data-idx]'));
+    var MOBILE     = 640;
+
+    function isMobile() { return window.innerWidth <= MOBILE; }
+
+    var mobileSections = sectionsEl ? Array.from(sectionsEl.querySelectorAll('.rl-section')) : [];
+
+    function setActive(idx) {
+        stats.forEach(function (t) {
+            t.classList.toggle('active', parseInt(t.getAttribute('data-idx'), 10) === idx);
+        });
+    }
+
+    function showSection(idx) {
+        mobileSections.forEach(function (s, i) { s.classList.toggle('active', i === idx); });
+        if (allView)    allView.style.display    = 'none';
+        if (sectionsEl) sectionsEl.style.display = 'block';
+    }
+
+    function showAllView() {
+        mobileSections.forEach(function (s) { s.classList.remove('active'); });
+        if (sectionsEl) sectionsEl.style.display = 'none';
+        if (allView)    allView.style.display    = 'block';
+    }
+
+    stats.forEach(function (tab) {
+        var idx = parseInt(tab.getAttribute('data-idx'), 10);
+        tab.addEventListener('click', function (e) {
+            if (!isMobile()) return;
+            e.preventDefault();
+            if (idx === -1) {
+                showAllView();
+            } else {
+                showSection(idx);
+            }
+            setActive(idx);
+        });
+    });
+
+    // Default mobile state: show Reading section (index 0)
+    if (isMobile() && mobileSections.length) {
+        showSection(0);
+        setActive(0);
+    }
+})();
+</script>

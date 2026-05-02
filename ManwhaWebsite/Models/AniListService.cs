@@ -450,6 +450,97 @@ query Browse{varDecl} {{
                 return MapPage(data, "Page");
             }
 
+            public async Task<RankingsViewModel> GetRankingsAsync()
+            {
+                const string cacheKey = "rankings_data";
+                if (_cache.TryGetValue(cacheKey, out RankingsViewModel? cached) && cached is not null)
+                    return cached;
+
+                var gql = @"
+query Rankings {
+  topRated: Page(page: 1, perPage: 50) {
+    media(type: MANGA, countryOfOrigin: KR, sort: SCORE_DESC, averageScore_greater: 0, isAdult: false) {
+      id
+      title { romaji english }
+      coverImage { large }
+      averageScore
+      popularity
+      genres
+      status
+      chapters
+    }
+  }
+  trending: Page(page: 1, perPage: 50) {
+    media(type: MANGA, countryOfOrigin: KR, sort: TRENDING_DESC, isAdult: false) {
+      id
+      title { romaji english }
+      coverImage { large }
+      averageScore
+      popularity
+      genres
+      status
+      chapters
+    }
+  }
+}";
+                var body = JsonSerializer.Serialize(new { query = gql, variables = new { } });
+                var content = new StringContent(body, Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync("https://graphql.anilist.co", content);
+                if (!response.IsSuccessStatusCode) return new RankingsViewModel();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("data", out var data)) return new RankingsViewModel();
+
+                var result = new RankingsViewModel
+                {
+                    TopRated = MapPage(data, "topRated"),
+                    Trending = MapPage(data, "trending"),
+                };
+                _cache.Set(cacheKey, result, TimeSpan.FromMinutes(30));
+                return result;
+            }
+
+            public async Task<List<Manhwa>> GetCandidatePoolAsync()
+            {
+                const string cacheKey = "candidate_pool";
+                if (_cache.TryGetValue(cacheKey, out List<Manhwa>? cached) && cached is not null)
+                    return cached;
+
+                var allResults = new List<Manhwa>();
+                for (int page = 1; page <= 4; page++)
+                {
+                    var gql = @"
+query CandidatePool($page: Int) {
+  Page(page: $page, perPage: 50) {
+    media(type: MANGA, countryOfOrigin: KR, sort: POPULARITY_DESC, isAdult: false) {
+      id
+      title { romaji english }
+      coverImage { large }
+      averageScore
+      popularity
+      genres
+      status
+      chapters
+    }
+  }
+}";
+                    var body = JsonSerializer.Serialize(new { query = gql, variables = new { page } });
+                    var content = new StringContent(body, Encoding.UTF8, "application/json");
+                    var response = await _http.PostAsync("https://graphql.anilist.co", content);
+                    if (!response.IsSuccessStatusCode) break;
+                    var json = await response.Content.ReadAsStringAsync();
+                    var doc = JsonDocument.Parse(json);
+                    if (!doc.RootElement.TryGetProperty("data", out var data)) break;
+                    var page_results = MapPage(data, "Page");
+                    if (page_results.Count == 0) break;
+                    allResults.AddRange(page_results);
+                }
+
+                _cache.Set(cacheKey, allResults, TimeSpan.FromMinutes(60));
+                return allResults;
+            }
+
             public async Task<List<Manhwa>> SearchAsync(string query, int count = 8)
             {
                 var gql = @"
@@ -466,6 +557,58 @@ query Search($search: String, $perPage: Int) {
   }
 }";
                 var body = JsonSerializer.Serialize(new { query = gql, variables = new { search = query, perPage = count } });
+                var content = new StringContent(body, Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync("https://graphql.anilist.co", content);
+                if (!response.IsSuccessStatusCode) return new List<Manhwa>();
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("data", out var data)) return new List<Manhwa>();
+                return MapPage(data, "Page");
+            }
+
+            public async Task<List<Manhwa>> GetLatestAsync(int page = 1)
+            {
+                var gql = @"
+query Latest($page: Int) {
+  Page(page: $page, perPage: 40) {
+    media(type: MANGA, countryOfOrigin: KR, sort: UPDATED_AT_DESC, isAdult: false) {
+      id
+      title { romaji english }
+      coverImage { large }
+      averageScore
+      chapters
+      status
+      updatedAt
+    }
+  }
+}";
+                var body = JsonSerializer.Serialize(new { query = gql, variables = new { page } });
+                var content = new StringContent(body, Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync("https://graphql.anilist.co", content);
+                if (!response.IsSuccessStatusCode) return new List<Manhwa>();
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("data", out var data)) return new List<Manhwa>();
+                return MapPage(data, "Page");
+            }
+
+            public async Task<List<Manhwa>> GetPopularAsync(int page = 1)
+            {
+                var gql = @"
+query Popular($page: Int) {
+  Page(page: $page, perPage: 40) {
+    media(type: MANGA, countryOfOrigin: KR, sort: POPULARITY_DESC, isAdult: false) {
+      id
+      title { romaji english }
+      coverImage { large }
+      averageScore
+      popularity
+      chapters
+      status
+    }
+  }
+}";
+                var body = JsonSerializer.Serialize(new { query = gql, variables = new { page } });
                 var content = new StringContent(body, Encoding.UTF8, "application/json");
                 var response = await _http.PostAsync("https://graphql.anilist.co", content);
                 if (!response.IsSuccessStatusCode) return new List<Manhwa>();

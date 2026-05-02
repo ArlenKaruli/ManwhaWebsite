@@ -1,0 +1,108 @@
+@model ManwhaWebsite.Models.RankingsViewModel
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = "Rankings";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/rankings.css" asp-append-version="true" />
+}
+
+<div class="rankings-page">
+    <div class="rankings-header">
+        <h1 class="rankings-title">Rankings</h1>
+        <p class="rankings-subtitle">The best manhwa, ranked by score and trend</p>
+        <div class="rankings-toggle">
+            <button class="rankings-toggle-btn active" id="btnTopRated" onclick="switchTab('topRated')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                Top Rated
+            </button>
+            <button class="rankings-toggle-btn" id="btnTrending" onclick="switchTab('trending')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                Trending
+            </button>
+        </div>
+    </div>
+
+    <!-- Top Rated List -->
+    <div class="rankings-list" id="listTopRated">
+        @for (int i = 0; i < Model.TopRated.Count; i++)
+        {
+            var item = Model.TopRated[i];
+            <a class="rankings-row" href="/manga/@item.Id">
+                <span class="rankings-rank @(i < 3 ? "top-" + (i + 1) : "")">@(i + 1)</span>
+                <img class="rankings-cover" src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
+                <div class="rankings-info">
+                    <span class="rankings-name">@item.Title</span>
+                    <div class="rankings-meta">
+                        @if (item.Genres.Any())
+                        {
+                            @foreach (var g in item.Genres.Take(3))
+                            {
+                                <span class="rankings-genre">@g</span>
+                            }
+                        }
+                        @if (!string.IsNullOrEmpty(item.Status))
+                        {
+                            <span class="rankings-status">@(item.Status == "RELEASING" ? "Ongoing" : item.Status == "FINISHED" ? "Completed" : item.Status)</span>
+                        }
+                    </div>
+                </div>
+                <div class="rankings-score">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="var(--gold)"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    @item.Rating.ToString("0.0")
+                </div>
+            </a>
+        }
+        @if (!Model.TopRated.Any())
+        {
+            <p class="rankings-empty">No data available.</p>
+        }
+    </div>
+
+    <!-- Trending List -->
+    <div class="rankings-list hidden" id="listTrending">
+        @for (int i = 0; i < Model.Trending.Count; i++)
+        {
+            var item = Model.Trending[i];
+            <a class="rankings-row" href="/manga/@item.Id">
+                <span class="rankings-rank @(i < 3 ? "top-" + (i + 1) : "")">@(i + 1)</span>
+                <img class="rankings-cover" src="@item.CoverImageUrl" alt="@item.Title" loading="lazy" />
+                <div class="rankings-info">
+                    <span class="rankings-name">@item.Title</span>
+                    <div class="rankings-meta">
+                        @if (item.Genres.Any())
+                        {
+                            @foreach (var g in item.Genres.Take(3))
+                            {
+                                <span class="rankings-genre">@g</span>
+                            }
+                        }
+                        @if (!string.IsNullOrEmpty(item.Status))
+                        {
+                            <span class="rankings-status">@(item.Status == "RELEASING" ? "Ongoing" : item.Status == "FINISHED" ? "Completed" : item.Status)</span>
+                        }
+                    </div>
+                </div>
+                <div class="rankings-score trending-score">
+                    #@(i + 1)
+                </div>
+            </a>
+        }
+        @if (!Model.Trending.Any())
+        {
+            <p class="rankings-empty">No data available.</p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function switchTab(tab) {
+            document.getElementById('listTopRated').classList.toggle('hidden', tab !== 'topRated');
+            document.getElementById('listTrending').classList.toggle('hidden', tab !== 'trending');
+            document.getElementById('btnTopRated').classList.toggle('active', tab === 'topRated');
+            document.getElementById('btnTrending').classList.toggle('active', tab === 'trending');
+        }
+    </script>
+}

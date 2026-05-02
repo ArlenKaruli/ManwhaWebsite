@@ -39,6 +39,10 @@ namespace ManwhaWebsite.Controllers
                 var myRating = await _context.UserManhwaRatings
                     .FirstOrDefaultAsync(r => r.UserId == userId && r.AniListId == id);
                 vm.CurrentUserRating = myRating?.Score;
+
+                var listEntry = await _context.UserReadingLists
+                    .FirstOrDefaultAsync(e => e.UserId == userId && e.AniListId == id);
+                vm.CurrentUserReadingStatus = listEntry?.Status;
             }
 
             return View(vm);

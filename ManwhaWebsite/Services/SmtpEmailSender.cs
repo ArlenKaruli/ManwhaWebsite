@@ -84,7 +84,27 @@ namespace ManwhaWebsite.Services
             SendEmailAsync(email, "Reset your password",
                 $"Your password reset code is: {resetCode}");
 
-        private Task SendEmailAsync(string toEmail, string subject, string htmlBody)
+        public Task SendContactMessageAsync(string fromName, string fromEmail, string subject, string message)
+        {
+            var section = _config.GetSection("EmailSettings");
+            var senderEmail = section["SenderEmail"] ?? throw new InvalidOperationException("EmailSettings:SenderEmail is not configured.");
+            var senderName = section["SenderName"] ?? "ManhwaVault";
+
+            var htmlBody = $"""
+                <!DOCTYPE html>
+                <html><body style="font-family:Arial,sans-serif;background:#0d0d12;color:#eaeaf0;padding:32px;">
+                  <h2 style="color:#e8445a;">New Contact Form Submission</h2>
+                  <p><strong>From:</strong> {System.Net.WebUtility.HtmlEncode(fromName)} &lt;{System.Net.WebUtility.HtmlEncode(fromEmail)}&gt;</p>
+                  <p><strong>Subject:</strong> {System.Net.WebUtility.HtmlEncode(subject)}</p>
+                  <hr style="border-color:#333;" />
+                  <p style="white-space:pre-wrap;">{System.Net.WebUtility.HtmlEncode(message)}</p>
+                </body></html>
+                """;
+
+            return SendEmailAsync(senderEmail, $"[Contact] {subject}", htmlBody, replyTo: fromEmail);
+        }
+
+        private Task SendEmailAsync(string toEmail, string subject, string htmlBody, string? replyTo = null)
         {
             var section = _config.GetSection("EmailSettings");
             var host = section["SmtpHost"] ?? throw new InvalidOperationException("EmailSettings:SmtpHost is not configured.");
@@ -109,6 +129,8 @@ namespace ManwhaWebsite.Services
                 IsBodyHtml = true
             };
             message.To.Add(toEmail);
+            if (replyTo != null)
+                message.ReplyToList.Add(new MailAddress(replyTo));
 
             return client.SendMailAsync(message);
         }

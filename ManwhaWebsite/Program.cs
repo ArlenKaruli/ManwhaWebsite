@@ -28,13 +28,20 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>();
 var smtpConfigured = !string.IsNullOrWhiteSpace(builder.Configuration["EmailSettings:Username"]);
 if (smtpConfigured)
+{
     builder.Services.AddTransient<IEmailSender<ApplicationUser>, SmtpEmailSender>();
+    builder.Services.AddTransient<SmtpEmailSender>();
+}
 else
     builder.Services.AddTransient<IEmailSender<ApplicationUser>, LoggingEmailSender>();
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddHttpClient<AniListService>();
+builder.Services.AddHttpClient<AniListService>(client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("ManhwaVault/1.0");
+});
 builder.Services.AddMemoryCache();
+builder.Services.AddScoped<RecommendationService>();
 
 
 var app = builder.Build();

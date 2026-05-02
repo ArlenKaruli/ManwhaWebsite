@@ -1,0 +1,125 @@
+@model List<ManwhaWebsite.Models.Manhwa>
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = "Popular Manhwa";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/browse.css" asp-append-version="true" />
+}
+
+<div class="browse-page">
+    <div class="browse-header">
+        <h1 class="browse-title">Popular <span class="accent">Manhwa</span></h1>
+        <p class="browse-subtitle">The most-read manhwa on the platform</p>
+    </div>
+
+    <div class="browse-results-header">
+        <span class="browse-results-count" id="resultsCount">@Model.Count titles</span>
+        <span class="browse-results-note" id="resultsNote">Page 1</span>
+    </div>
+
+    <div id="popularGrid" class="updated-grid browse-grid">
+        @foreach (var m in Model)
+        {
+            <a href="/manga/@m.Id" class="updated-card">
+                <div class="updated-cover">
+                    <img src="@m.CoverImageUrl" alt="@m.Title" loading="lazy" />
+                </div>
+                <div class="updated-info">
+                    <div class="updated-title">@m.Title</div>
+                    @if (m.Rating > 0)
+                    {
+                        <div class="updated-chapter">★ @m.Rating.ToString("0.0")</div>
+                    }
+                    <div class="updated-time">@FormatStatus(m.Status)</div>
+                </div>
+            </a>
+        }
+    </div>
+
+    <div class="browse-loadmore-wrap" id="loadMoreWrap">
+        <button class="browse-loadmore-btn" id="loadMoreBtn" type="button">Load More</button>
+    </div>
+
+    <div class="browse-loading" id="browseLoading">
+        <div class="browse-spinner"></div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let currentPage = 1;
+    let loading = false;
+
+    document.getElementById('loadMoreBtn').addEventListener('click', loadMore);
+
+    async function loadMore() {
+        if (loading) return;
+        loading = true;
+        currentPage++;
+
+        const btn = document.getElementById('loadMoreBtn');
+        const spinner = document.getElementById('browseLoading');
+        btn.style.display = 'none';
+        spinner.style.display = 'flex';
+
+        try {
+            const res = await fetch(`/Popular/LoadMore?page=${currentPage}`);
+            const items = await res.json();
+
+            if (!items.length) {
+                document.getElementById('loadMoreWrap').style.display = 'none';
+                spinner.style.display = 'none';
+                loading = false;
+                return;
+            }
+
+            const grid = document.getElementById('popularGrid');
+            items.forEach(m => {
+                const score = m.score > 0 ? `<div class="updated-chapter">★ ${m.score.toFixed(1)}</div>` : '';
+                grid.insertAdjacentHTML('beforeend', `
+                    <a href="/manga/${m.id}" class="updated-card">
+                        <div class="updated-cover">
+                            <img src="${m.cover}" alt="${escHtml(m.title)}" loading="lazy" />
+                        </div>
+                        <div class="updated-info">
+                            <div class="updated-title">${escHtml(m.title)}</div>
+                            ${score}
+                            <div class="updated-time">${formatStatus(m.status)}</div>
+                        </div>
+                    </a>`);
+            });
+
+            const total = grid.querySelectorAll('.updated-card').length;
+            document.getElementById('resultsCount').textContent = `${total} titles`;
+            document.getElementById('resultsNote').textContent = `Page ${currentPage}`;
+        } catch {
+            currentPage--;
+        }
+
+        spinner.style.display = 'none';
+        btn.style.display = '';
+        loading = false;
+    }
+
+    function formatStatus(s) {
+        const map = { FINISHED: 'Completed', RELEASING: 'Ongoing', NOT_YET_RELEASED: 'Upcoming' };
+        return map[s] || s || '';
+    }
+
+    function escHtml(s) {
+        return (s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+</script>
+}
+
+@functions {
+    string FormatStatus(string s) => s switch
+    {
+        "FINISHED" => "Completed",
+        "RELEASING" => "Ongoing",
+        "NOT_YET_RELEASED" => "Upcoming",
+        _ => s ?? ""
+    };
+}

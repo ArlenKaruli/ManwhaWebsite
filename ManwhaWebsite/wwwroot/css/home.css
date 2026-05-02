@@ -928,6 +928,9 @@ button {
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
 .card-cover {
@@ -1450,10 +1453,14 @@ footer {
 }
 
 .footer-inner {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 40px;
+    display: flex;
+    align-items: flex-start;
+    gap: 60px;
     margin-bottom: 48px;
+}
+
+.footer-brand {
+    flex: 1;
 }
 
 .footer-brand p {
@@ -1468,9 +1475,16 @@ footer {
     font-size: 13px;
     font-weight: 600;
     color: var(--text);
+    margin-top: 0;
     margin-bottom: 16px;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+.footer-col ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 .footer-col li {
@@ -1960,3 +1974,4 @@ body::after {
     box-shadow: 0 0 20px rgba(232,68,90,0.4);
 }
 }
+

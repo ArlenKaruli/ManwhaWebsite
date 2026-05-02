@@ -1,0 +1,87 @@
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = "About";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/static-pages.css" asp-append-version="true" />
+}
+
+<div class="static-page">
+
+    <a href="/" class="static-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        Back to Home
+    </a>
+
+    <div class="static-hero">
+        <span class="static-hero-label">Our Story</span>
+        <h1>About ManhwaVault</h1>
+        <p>Built by readers, for readers — ManhwaVault is your all-in-one hub for discovering, tracking, and celebrating the best manhwa, manhua, and manga.</p>
+    </div>
+
+    <div class="static-section">
+        <h2>What We Do</h2>
+        <p>ManhwaVault aggregates data from trusted sources like AniList to give you real-time scores, trending rankings, and rich title information in one clean, fast interface. Whether you're hunting for your next obsession or keeping tabs on ongoing series, we've got you covered.</p>
+    </div>
+
+    <div class="static-divider"></div>
+
+    <div class="static-section">
+        <h2>Features</h2>
+        <div class="static-features">
+            <div class="static-feature-card">
+                <div class="static-feature-icon">&#128218;</div>
+                <h3>Reading List</h3>
+                <p>Save titles to your personal reading list and track your progress across hundreds of series.</p>
+            </div>
+            <div class="static-feature-card">
+                <div class="static-feature-icon">&#128202;</div>
+                <h3>Live Rankings</h3>
+                <p>Explore top-rated and trending titles updated in real time from AniList's global community.</p>
+            </div>
+            <div class="static-feature-card">
+                <div class="static-feature-icon">&#128269;</div>
+                <h3>Advanced Browse</h3>
+                <p>Filter by genre, status, rating, chapter count, and publication year to find exactly what you want.</p>
+            </div>
+            <div class="static-feature-card">
+                <div class="static-feature-icon">&#127775;</div>
+                <h3>Recommendations</h3>
+                <p>Get personalised suggestions based on your reading history and the genres you love.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="static-divider"></div>
+
+    <div class="static-section">
+        <h2>Our Mission</h2>
+        <p>We believe great stories shouldn't be hard to find. The manhwa and manhua space is exploding with talent, and ManhwaVault exists to surface the best of it — with no clutter, no paywalls, and no noise. Just titles, rankings, and a community of passionate readers.</p>
+    </div>
+
+    <div class="static-section">
+        <h2>Data Sources</h2>
+        <p>All title data, cover art, scores, and popularity metrics are sourced from the AniList GraphQL API. We respect their rate limits and terms of service. Descriptions may be adapted from AniList records.</p>
+    </div>
+
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;">
+                    Manhwa<span style="color:var(--accent)">Vault</span>
+                </div>
+                <p>Your ultimate destination for manhwa, manhua, and manga. Track your list, discover new titles, and connect with the community.</p>
+            </div>
+            <div class="footer-col"><h4>Browse</h4><ul><li><a href="/Browse">Browse</a></li><li><a href="/Popular">Popular</a></li><li><a href="/Rankings">Rankings</a></li><li><a href="/Latest">Latest</a></li></ul></div>
+            <div class="footer-col"><h4>Info</h4><ul><li><a href="/Static/About">About</a></li><li><a href="/Static/Contact">Contact</a></li><li><a href="/Static/Privacy">Privacy</a></li><li><a href="/Static/Terms">Terms</a></li></ul></div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; @DateTime.Now.Year ManhwaVault. All rights reserved.</span>
+            <span>Made for readers, by readers.</span>
+        </div>
+    </div>
+</footer>

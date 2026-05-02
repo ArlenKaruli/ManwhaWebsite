@@ -41,9 +41,9 @@
             <div class="nav-actions">
                 <div class="nav-links">
                     <div><a href="/Browse">Browse</a></div>
-                    <div><a href="#">Genres</a></div>
-                    <div><a href="#">Rankings</a></div>
-                    <div><a href="#">Latest</a></div>
+                    <div><a href="/Popular">Popular</a></div>
+                    <div><a href="/Rankings">Rankings</a></div>
+                    <div><a href="/Latest">Latest</a></div>
                 </div>
                 <div class="nav-right">
                     @if (SignInManager.IsSignedIn(User))
@@ -65,6 +65,10 @@
                                 <a href="/Identity/Account/Manage" class="nav-account-menu-item" role="menuitem">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
                                     My Profile
+                                </a>
+                                <a href="/ReadingList" class="nav-account-menu-item" role="menuitem">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-6 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm4 13H8v-.9c0-2 4-3.1 6-3.1s6 1.1 6 3.1V18z"/></svg>
+                                    My Reading List
                                 </a>
                                 <a href="/Identity/Account/Manage/ChangePassword" class="nav-account-menu-item" role="menuitem">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.01 7.01 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.47.47 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.37 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.47.47 0 0 0-.12-.61l-2.03-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>
@@ -98,16 +102,11 @@
                 Manhwa<span style="color:var(--accent)">Vault</span>
             </div>
             <a href="/Browse">Browse</a>
-            <a href="#">Genres</a>
-            <a href="#">Rankings</a>
-            <a href="#">Latest</a>
+            <a href="/Popular">Popular</a>
+            <a href="/Rankings">Rankings</a>
+            <a href="/Latest">Latest</a>
             <hr style="border-color:var(--border);margin:8px 0" />
-            @if (SignInManager.IsSignedIn(User))
-            {
-                <a href="/Identity/Account/Manage">My Profile</a>
-                <a href="/Identity/Account/Manage/ChangePassword">Account Settings</a>
-            }
-            else
+            @if (!SignInManager.IsSignedIn(User))
             {
                 <a href="/Identity/Account/Login">Sign In</a>
                 <a href="/Identity/Account/Register">Join Free</a>
