@@ -1,7 +1,10 @@
+using ManwhaWebsite.Data;
 using ManwhaWebsite.Models;
+using ManwhaWebsite.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace ManwhaWebsite.Areas.Identity.Pages.Account.Manage
@@ -11,19 +14,31 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IWebHostEnvironment _env;
+        private readonly ApplicationDbContext _db;
+        private readonly MangaUpdatesService _mangaUpdates;
 
         private static readonly HashSet<string> _allowedExtensions =
             new(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
 
-        public IndexModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IWebHostEnvironment env)
+        public IndexModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
+            IWebHostEnvironment env, ApplicationDbContext db, MangaUpdatesService mangaUpdates)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _env = env;
+            _db = db;
+            _mangaUpdates = mangaUpdates;
         }
 
         public string Username { get; set; } = string.Empty;
         public string? ProfilePictureUrl { get; set; }
+
+        public int StatManhwasRead { get; set; }
+        public int StatChaptersRead { get; set; }
+        public string StatDaysRead { get; set; } = "0";
+        public int StatCommentsMade { get; set; }
+        public int StatUpvotesReceived { get; set; }
+        public int StatDownvotesReceived { get; set; }
 
         [TempData]
         public string? StatusMessage { get; set; }
@@ -46,6 +61,10 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string? PhoneNumber { get; set; }
+
+            [Display(Name = "Bio")]
+            [MaxLength(160)]
+            public string? Bio { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -55,8 +74,68 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account.Manage
             Input = new InputModel
             {
                 DisplayName = user.DisplayName,
-                PhoneNumber = await _userManager.GetPhoneNumberAsync(user)
+                PhoneNumber = await _userManager.GetPhoneNumberAsync(user),
+                Bio = user.Bio
             };
+        }
+
+        private async Task LoadStatsAsync(string userId)
+        {
+            var entries = await _db.UserReadingLists
+                .Where(e => e.UserId == userId)
+                .ToListAsync();
+
+            // Both Reading and Completed count as "read"
+            StatManhwasRead = entries.Count(e =>
+                e.Status == ReadingStatus.Reading || e.Status == ReadingStatus.Completed);
+
+            // Refresh stale MangaUpdates chapter counts for Reading + Completed entries (max 10 per load)
+            var stale = entries
+                .Where(e => (e.Status == ReadingStatus.Reading || e.Status == ReadingStatus.Completed) &&
+                            !e.Chapters.HasValue &&
+                            (e.MdChaptersCachedAt == null ||
+                             e.MdChaptersCachedAt < DateTime.UtcNow.AddHours(-24)))
+                .Take(10)
+                .ToList();
+
+            foreach (var entry in stale)
+            {
+                var ch = await _mangaUpdates.GetTotalChaptersByTitleAsync(entry.Title);
+                entry.MdChapters = ch;
+                entry.MdChaptersCachedAt = DateTime.UtcNow;
+            }
+
+            if (stale.Count > 0)
+                await _db.SaveChangesAsync();
+
+            // Sum chapters for Reading + Completed: user-entered value takes priority, MangaUpdates as fallback
+            int total = 0;
+            foreach (var entry in entries.Where(e =>
+                e.Status == ReadingStatus.Reading || e.Status == ReadingStatus.Completed))
+            {
+                if (entry.Chapters.HasValue)
+                    total += entry.Chapters.Value;
+                else if (entry.MdChapters.HasValue)
+                    total += entry.MdChapters.Value;
+            }
+
+            StatChaptersRead = total;
+
+            var minutes = total * 7.0;
+            var days = minutes / 1440.0;
+            StatDaysRead = days >= 1 ? days.ToString("F1") : days.ToString("F2");
+
+            // Comments Made
+            StatCommentsMade = await _db.UserManhwaReviews.CountAsync(r => r.UserId == userId);
+
+            // Votes received on this user's reviews
+            var myReviewIds = await _db.UserManhwaReviews
+                .Where(r => r.UserId == userId)
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            StatUpvotesReceived   = await _db.ReviewVotes.CountAsync(v => myReviewIds.Contains(v.ReviewId) && v.IsUpvote);
+            StatDownvotesReceived = await _db.ReviewVotes.CountAsync(v => myReviewIds.Contains(v.ReviewId) && !v.IsUpvote);
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -64,6 +143,7 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
             await LoadAsync(user);
+            await LoadStatsAsync(user.Id);
             return Page();
         }
 
@@ -143,13 +223,14 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account.Manage
                 }
             }
 
-            if (Input.DisplayName != user.DisplayName)
+            if (Input.DisplayName != user.DisplayName || Input.Bio != user.Bio)
             {
                 user.DisplayName = Input.DisplayName ?? string.Empty;
+                user.Bio = Input.Bio?.Trim();
                 var result = await _userManager.UpdateAsync(user);
                 if (!result.Succeeded)
                 {
-                    StatusMessage = "Error: Failed to update display name.";
+                    StatusMessage = "Error: Failed to update profile.";
                     return RedirectToPage();
                 }
             }

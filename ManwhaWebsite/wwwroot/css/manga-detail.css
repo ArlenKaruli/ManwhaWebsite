@@ -629,3 +629,31 @@
         font-size: 13px;
     }
 }
+
+/* ── Review Votes ───────────────────────────────────────── */
+.review-votes {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+.vote-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border, #333);
+    background: transparent;
+    color: var(--text-muted, #aaa);
+    font-size: 13px;
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s;
+}
+.vote-btn:hover { color: var(--text, #fff); border-color: var(--text, #fff); }
+.upvote-btn.voted   { color: #4caf50; border-color: #4caf50; }
+.downvote-btn.voted { color: #f44336; border-color: #f44336; }
+.vote-display {
+    font-size: 13px;
+    color: var(--text-muted, #aaa);
+    margin-right: 8px;
+}

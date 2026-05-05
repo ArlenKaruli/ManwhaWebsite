@@ -123,7 +123,7 @@
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="aniListId" value="@entry.AniListId" />
                                     <input type="hidden" name="returnUrl" value="/ReadingList" />
-                                    <button type="submit" class="rl-btn-remove" title="Remove from list" onclick="return confirm('Remove from your list?')">
+                                    <button type="button" class="rl-btn-remove" title="Remove from list">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                                         </svg>
@@ -175,7 +175,7 @@
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="aniListId" value="@entry.AniListId" />
                                     <input type="hidden" name="returnUrl" value="/ReadingList" />
-                                    <button type="submit" class="rl-btn-remove" title="Remove" onclick="return confirm('Remove from your list?')">
+                                    <button type="button" class="rl-btn-remove" title="Remove">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                                         </svg>
@@ -225,7 +225,7 @@
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="aniListId" value="@entry.AniListId" />
                                             <input type="hidden" name="returnUrl" value="/ReadingList" />
-                                            <button type="submit" class="rl-btn-remove" title="Remove" onclick="return confirm('Remove from your list?')">
+                                            <button type="button" class="rl-btn-remove" title="Remove">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                                     <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                                                 </svg>
@@ -245,6 +245,43 @@
 
 <script>
 (function () {
+    // Inline remove confirmation — replaces browser confirm() dialog
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.rl-btn-remove');
+        if (!btn) return;
+        e.preventDefault();
+        var form = btn.closest('form');
+        if (!form) return;
+
+        // Already showing confirmation — ignore
+        if (btn.dataset.confirming) return;
+        btn.dataset.confirming = '1';
+
+        var original = btn.innerHTML;
+        btn.innerHTML = '';
+        btn.style.pointerEvents = 'none';
+
+        var wrap = document.createElement('span');
+        wrap.className = 'rl-confirm-inline';
+        wrap.innerHTML =
+            '<span class="rl-confirm-label">Remove?</span>' +
+            '<button class="rl-confirm-yes" type="button">Yes</button>' +
+            '<button class="rl-confirm-no" type="button">No</button>';
+
+        btn.parentNode.insertBefore(wrap, btn.nextSibling);
+
+        wrap.querySelector('.rl-confirm-yes').addEventListener('click', function () {
+            wrap.remove();
+            form.submit();
+        });
+        wrap.querySelector('.rl-confirm-no').addEventListener('click', function () {
+            wrap.remove();
+            btn.innerHTML = original;
+            btn.style.pointerEvents = '';
+            delete btn.dataset.confirming;
+        });
+    });
+
     var sectionsEl = document.getElementById('rl-sections');
     var allView    = document.getElementById('rl-all-view');
     var stats      = Array.from(document.querySelectorAll('.rl-stat[data-idx]'));

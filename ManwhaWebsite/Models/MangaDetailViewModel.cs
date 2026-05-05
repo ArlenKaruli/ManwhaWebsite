@@ -26,6 +26,10 @@ namespace ManwhaWebsite.Models
         public List<string> Genres { get; set; } = new();
         public List<CharacterInfo> Characters { get; set; } = new();
         public List<UserManhwaReview> Reviews { get; set; } = new();
+        public Dictionary<int, int> ReviewUpvotes { get; set; } = new();
+        public Dictionary<int, int> ReviewDownvotes { get; set; } = new();
+        public HashSet<int> CurrentUserUpvotedIds { get; set; } = new();
+        public HashSet<int> CurrentUserDownvotedIds { get; set; } = new();
         public int? CurrentUserRating { get; set; }
         public ReadingStatus? CurrentUserReadingStatus { get; set; }
     }

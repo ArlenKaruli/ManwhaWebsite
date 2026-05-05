@@ -6,5 +6,7 @@ namespace ManwhaWebsite.Models
     {
         public string DisplayName { get; set; } = string.Empty;
         public string? ProfilePictureUrl { get; set; }
+        public string? Bio { get; set; }
+        public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     }
 }

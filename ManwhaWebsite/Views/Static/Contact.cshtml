@@ -20,25 +20,7 @@
         <p>Have a question, found a bug, or just want to say hello? We'd love to hear from you.</p>
     </div>
 
-    <div class="static-contact-cards">
-        <div class="static-contact-card">
-            <div class="static-contact-card-icon">&#9993;</div>
-            <h3>General Enquiries</h3>
-            <p><a href="mailto:hello@manhwavault.com">hello@@manhwavault.com</a></p>
-        </div>
-        <div class="static-contact-card">
-            <div class="static-contact-card-icon">&#128030;</div>
-            <h3>Bug Reports</h3>
-            <p><a href="mailto:bugs@manhwavault.com">bugs@@manhwavault.com</a></p>
-        </div>
-        <div class="static-contact-card">
-            <div class="static-contact-card-icon">&#128274;</div>
-            <h3>Privacy &amp; Legal</h3>
-            <p><a href="mailto:legal@manhwavault.com">legal@@manhwavault.com</a></p>
-        </div>
-    </div>
-
-    <div class="static-section">
+<div class="static-section">
         <h2>Send a Message</h2>
         <p>Fill in the form below and we'll get back to you within 2 business days.</p>
 
@@ -47,7 +29,7 @@
             <div class="static-form-row">
                 <div class="static-field">
                     <label for="contactName">Name</label>
-                    <input type="text" id="contactName" name="name" placeholder="Your name" required />
+                    <input type="text" id="contactName" name="name" placeholder="Your name" maxlength="100" required />
                 </div>
                 <div class="static-field">
                     <label for="contactEmail">Email</label>
@@ -67,7 +49,7 @@
             </div>
             <div class="static-field">
                 <label for="contactMessage">Message</label>
-                <textarea id="contactMessage" name="message" placeholder="Tell us what's on your mind..." required></textarea>
+                <textarea id="contactMessage" name="message" placeholder="Tell us what's on your mind..." maxlength="5000" required></textarea>
             </div>
             <div id="contactStatus" style="display:none;margin-bottom:12px;font-size:14px;"></div>
             <button type="submit" class="static-submit" id="contactBtn">Send Message</button>

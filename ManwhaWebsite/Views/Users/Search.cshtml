@@ -1,0 +1,111 @@
+@model ManwhaWebsite.Models.UserSearchViewModel
+@{
+    Layout = "~/Views/Shared/_VaultLayout.cshtml";
+    ViewData["Title"] = string.IsNullOrEmpty(Model.Query) ? "Find Users" : $"Users: {Model.Query}";
+    bool hasQuery = !string.IsNullOrEmpty(Model.Query);
+    bool hasResults = Model.Results.Any();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/user-search.css" asp-append-version="true" />
+}
+
+<div class="us-page">
+
+    <div class="us-header">
+        <div class="us-header-title">Find <span>Users</span></div>
+        <form method="get" action="/users/search" class="us-search-form">
+            <div class="us-search-bar">
+                <span class="us-search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" name="q" value="@Model.Query" placeholder="Search by display name..." autocomplete="off" autofocus />
+                <button type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="us-results-wrap">
+
+        @if (hasQuery)
+        {
+            <div class="us-results-info">
+                @if (hasResults)
+                {
+                    <span>Found <strong>@Model.Results.Count</strong> @(Model.Results.Count == 1 ? "user" : "users") matching <strong>@Model.Query</strong></span>
+                }
+                else
+                {
+                    <span>No users found for <strong>@Model.Query</strong></span>
+                }
+            </div>
+        }
+
+        @if (hasResults)
+        {
+            <div class="us-grid">
+                @foreach (var user in Model.Results)
+                {
+                    <div class="us-card">
+                        <div class="us-card-avatar">
+                            @if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                            {
+                                <img src="@user.ProfilePictureUrl" alt="@user.DisplayName" />
+                            }
+                            else
+                            {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                                </svg>
+                            }
+                        </div>
+                        <div class="us-card-body">
+                            <div class="us-card-name">@user.DisplayName</div>
+                            @if (!string.IsNullOrEmpty(user.Bio))
+                            {
+                                <div class="us-card-bio">@user.Bio</div>
+                            }
+                            <div class="us-card-meta">
+                                <span class="us-card-joined">Joined @user.JoinedAt.ToString("MMM yyyy")</span>
+                                <div class="us-card-stats">
+                                    <span class="us-card-stat">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 14H8v-2h8v2zm0-4H8v-2h8v2zm0-4H8V6h8v2z"/></svg>
+                                        <strong>@user.ManhwaCount</strong> Manhwa
+                                    </span>
+                                    <span class="us-card-stat">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
+                                        <strong>@user.ReviewCount</strong> @(user.ReviewCount == 1 ? "Review" : "Reviews")
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="us-card-actions">
+                                <a href="/users/@user.UserId" class="us-card-view-btn">View Profile →</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else if (hasQuery)
+        {
+            <div class="us-empty">
+                <div class="us-empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="currentColor" opacity="0.3"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                </div>
+                <div class="us-empty-title">No Users Found</div>
+                <div class="us-empty-desc">No results for "<strong>@Model.Query</strong>". Try a different name.</div>
+            </div>
+        }
+        else
+        {
+            <div class="us-empty">
+                <div class="us-empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="currentColor" opacity="0.3"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                </div>
+                <div class="us-empty-title">Find Users</div>
+                <div class="us-empty-desc">Search by display name to discover other members of the community.</div>
+            </div>
+        }
+
+    </div>
+</div>

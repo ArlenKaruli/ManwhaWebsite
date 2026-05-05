@@ -15,6 +15,7 @@ namespace ManwhaWebsite.Data
         public DbSet<UserManhwaRating> UserManhwaRatings { get; set; }
         public DbSet<UserManhwaReview> UserManhwaReviews { get; set; }
         public DbSet<UserReadingList> UserReadingLists { get; set; }
+        public DbSet<ReviewVote> ReviewVotes { get; set; }
 
     }
 }

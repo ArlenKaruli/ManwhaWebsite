@@ -440,3 +440,37 @@
 .atl-dot-dropped    { background: #e57373; }
 
 .atl-menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* Inline remove confirmation */
+.rl-confirm-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.rl-confirm-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+.rl-confirm-yes,
+.rl-confirm-no {
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    font-size: 0.72rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.rl-confirm-yes {
+    background: rgba(229,115,115,0.15);
+    border-color: #e57373;
+    color: #e57373;
+}
+.rl-confirm-yes:hover { background: rgba(229,115,115,0.3); }
+.rl-confirm-no {
+    background: rgba(255,255,255,0.06);
+    border-color: var(--border);
+    color: var(--muted);
+}
+.rl-confirm-no:hover { background: rgba(255,255,255,0.12); }

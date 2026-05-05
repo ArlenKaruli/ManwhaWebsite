@@ -28,6 +28,12 @@ namespace ManwhaWebsite.Controllers
                 string.IsNullOrWhiteSpace(message))
                 return Json(new { ok = false, error = "Please fill in all required fields." });
 
+            if (name.Length > 100)
+                return Json(new { ok = false, error = "Name must be 100 characters or fewer." });
+
+            if (message.Length > 5000)
+                return Json(new { ok = false, error = "Message must be 5000 characters or fewer." });
+
             await _mailer.SendContactMessageAsync(name, email, subject ?? "General Question", message);
             return Json(new { ok = true });
         }

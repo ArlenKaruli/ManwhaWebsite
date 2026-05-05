@@ -71,6 +71,8 @@
                 var response = await _http.PostAsync("https://graphql.anilist.co", content);
                 response.EnsureSuccessStatusCode();
 
+
+
                 var json = await response.Content.ReadAsStringAsync();
                 var doc = JsonDocument.Parse(json);
                 var data = doc.RootElement.GetProperty("data");
@@ -409,10 +411,15 @@ query {
                 if (minRating > 0)
                     filters.Add($"averageScore_greater: {(int)(minRating!.Value * 10)}");
 
-                if (minChapters > 0)
+                bool isReleasing = string.Equals(status, "RELEASING", StringComparison.OrdinalIgnoreCase);
+
+                // For ongoing series AniList stores chapters=null (total unknown),
+                // so chapters_greater would exclude almost all of them. Apply server-side
+                // only when not filtering for ongoing status.
+                if (minChapters > 0 && !isReleasing)
                     filters.Add($"chapters_greater: {minChapters!.Value - 1}");
 
-                if (maxChapters > 0)
+                if (maxChapters > 0 && !isReleasing)
                     filters.Add($"chapters_lesser: {maxChapters!.Value + 1}");
 
                 if (publishedAfter > 0)

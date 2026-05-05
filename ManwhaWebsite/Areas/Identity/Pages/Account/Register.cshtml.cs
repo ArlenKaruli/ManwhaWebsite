@@ -72,7 +72,8 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account
             {
                 UserName = Input.Email,
                 Email = Input.Email,
-                DisplayName = Input.DisplayName
+                DisplayName = Input.DisplayName,
+                JoinedAt = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, Input.Password);

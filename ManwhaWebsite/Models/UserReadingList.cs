@@ -17,6 +17,8 @@ namespace ManwhaWebsite.Models
         public string CoverImageUrl { get; set; } = "";
         public ReadingStatus Status { get; set; }
         public int? Chapters { get; set; }
+        public int? MdChapters { get; set; }
+        public DateTime? MdChaptersCachedAt { get; set; }
         public DateTime AddedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

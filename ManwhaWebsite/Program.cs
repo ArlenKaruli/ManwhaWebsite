@@ -40,6 +40,10 @@ builder.Services.AddHttpClient<AniListService>(client =>
 {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("ManhwaVault/1.0");
 });
+builder.Services.AddHttpClient<MangaUpdatesService>(client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("ManhwaVault/1.0");
+});
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<RecommendationService>();
 
