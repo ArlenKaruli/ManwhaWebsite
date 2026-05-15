@@ -1,30 +1,30 @@
+using ManwhaWebsite.Data;
 using ManwhaWebsite.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace ManwhaWebsite.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender<ApplicationUser> _emailSender;
-        private readonly ILogger<RegisterModel> _logger;
+        private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
+        private readonly ApplicationDbContext _db;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
             IEmailSender<ApplicationUser> emailSender,
-            ILogger<RegisterModel> logger)
+            IPasswordHasher<ApplicationUser> passwordHasher,
+            ApplicationDbContext db)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _emailSender = emailSender;
-            _logger = logger;
+            _passwordHasher = passwordHasher;
+            _db = db;
         }
 
         [BindProperty]
@@ -68,38 +68,43 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account
             if (!ModelState.IsValid)
                 return Page();
 
-            var user = new ApplicationUser
+            var normalizedEmail = Input.Email.Trim().ToUpperInvariant();
+
+            var existingUser = await _userManager.FindByEmailAsync(Input.Email);
+            if (existingUser != null)
             {
-                UserName = Input.Email,
-                Email = Input.Email,
-                DisplayName = Input.DisplayName,
-                JoinedAt = DateTime.UtcNow
-            };
-
-            var result = await _userManager.CreateAsync(user, Input.Password);
-
-            if (result.Succeeded)
-            {
-                _logger.LogInformation("User created a new account with password.");
-
-                var userId = await _userManager.GetUserIdAsync(user);
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-                var confirmationLink = Url.Page(
-                    "/Account/ConfirmEmail",
-                    pageHandler: null,
-                    values: new { area = "Identity", userId, code = encodedToken, returnUrl },
-                    protocol: Request.Scheme)!;
-
-                await _emailSender.SendConfirmationLinkAsync(user, Input.Email, confirmationLink);
-
-                return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl });
+                ModelState.AddModelError(string.Empty, "An account with this email already exists.");
+                return Page();
             }
 
-            foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
+            // Remove any previous unconfirmed attempt for this email
+            var existing = await _db.PendingRegistrations
+                .FirstOrDefaultAsync(p => p.Email.ToUpper() == normalizedEmail);
+            if (existing != null)
+                _db.PendingRegistrations.Remove(existing);
 
-            return Page();
+            var tempUser = new ApplicationUser();
+            var pending = new PendingRegistration
+            {
+                Email = Input.Email.Trim(),
+                DisplayName = Input.DisplayName,
+                PasswordHash = _passwordHasher.HashPassword(tempUser, Input.Password),
+                ExpiresAt = DateTime.UtcNow.AddHours(24)
+            };
+
+            _db.PendingRegistrations.Add(pending);
+            await _db.SaveChangesAsync();
+
+            var confirmationLink = Url.Page(
+                "/Account/ConfirmEmail",
+                pageHandler: null,
+                values: new { area = "Identity", pendingId = pending.Id, returnUrl },
+                protocol: Request.Scheme)!;
+
+            var userForEmail = new ApplicationUser { Email = Input.Email, DisplayName = Input.DisplayName };
+            await _emailSender.SendConfirmationLinkAsync(userForEmail, Input.Email, confirmationLink);
+
+            return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl });
         }
     }
 }

@@ -16,18 +16,21 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account.Manage
         private readonly IWebHostEnvironment _env;
         private readonly ApplicationDbContext _db;
         private readonly MangaUpdatesService _mangaUpdates;
+        private readonly BlobStorageService? _blob;
 
         private static readonly HashSet<string> _allowedExtensions =
             new(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
 
         public IndexModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-            IWebHostEnvironment env, ApplicationDbContext db, MangaUpdatesService mangaUpdates)
+            IWebHostEnvironment env, ApplicationDbContext db, MangaUpdatesService mangaUpdates,
+            BlobStorageService? blob = null)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _env = env;
             _db = db;
             _mangaUpdates = mangaUpdates;
+            _blob = blob;
         }
 
         public string Username { get; set; } = string.Empty;
@@ -160,9 +163,19 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account.Manage
 
             if (RemoveProfilePicture && !string.IsNullOrEmpty(user.ProfilePictureUrl))
             {
-                var oldPath = Path.Combine(_env.WebRootPath, user.ProfilePictureUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-                if (System.IO.File.Exists(oldPath))
-                    System.IO.File.Delete(oldPath);
+                if (_blob != null)
+                {
+                    var blobName = user.ProfilePictureUrl!.StartsWith("/profile-picture/")
+                        ? user.ProfilePictureUrl["/profile-picture/".Length..]
+                        : user.Id;
+                    await _blob.DeleteAsync(blobName);
+                }
+                else
+                {
+                    var oldPath = Path.Combine(_env.WebRootPath, user.ProfilePictureUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    if (System.IO.File.Exists(oldPath))
+                        System.IO.File.Delete(oldPath);
+                }
                 user.ProfilePictureUrl = null;
                 var removeResult = await _userManager.UpdateAsync(user);
                 if (!removeResult.Succeeded)
@@ -186,24 +199,33 @@ namespace ManwhaWebsite.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
 
-                var uploadDir = Path.Combine(_env.WebRootPath, "uploads", "profile-pictures");
-                Directory.CreateDirectory(uploadDir);
-
-                var fileName = user.Id + ext;
-                var filePath = Path.Combine(uploadDir, fileName);
-
-                // Delete old file if extension changed
-                foreach (var oldExt in _allowedExtensions)
+                string pictureUrl;
+                if (_blob != null)
                 {
-                    var old = Path.Combine(uploadDir, user.Id + oldExt);
-                    if (old != filePath && System.IO.File.Exists(old))
-                        System.IO.File.Delete(old);
+                    var blobName = user.Id + ext;
+                    var contentType = ProfilePictureFile.ContentType;
+                    using var stream = ProfilePictureFile.OpenReadStream();
+                    await _blob.UploadAsync(blobName, stream, contentType);
+                    pictureUrl = "/profile-picture/" + blobName;
+                }
+                else
+                {
+                    var uploadDir = Path.Combine(_env.WebRootPath, "uploads", "profile-pictures");
+                    Directory.CreateDirectory(uploadDir);
+                    var fileName = user.Id + ext;
+                    var filePath = Path.Combine(uploadDir, fileName);
+                    foreach (var oldExt in _allowedExtensions)
+                    {
+                        var old = Path.Combine(uploadDir, user.Id + oldExt);
+                        if (old != filePath && System.IO.File.Exists(old))
+                            System.IO.File.Delete(old);
+                    }
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                        await ProfilePictureFile.CopyToAsync(stream);
+                    pictureUrl = "/uploads/profile-pictures/" + fileName;
                 }
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                    await ProfilePictureFile.CopyToAsync(stream);
-
-                user.ProfilePictureUrl = "/uploads/profile-pictures/" + fileName;
+                user.ProfilePictureUrl = pictureUrl;
                 var picResult = await _userManager.UpdateAsync(user);
                 if (!picResult.Succeeded)
                 {

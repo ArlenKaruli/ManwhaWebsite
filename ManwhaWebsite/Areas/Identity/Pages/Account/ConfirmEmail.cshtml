@@ -8,6 +8,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d0d12" />
     <title>@(Model.Success ? "Welcome to ManhwaVault" : "Verification Failed") — ManhwaVault</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -180,7 +181,7 @@
                 <span class="icon">⚠️</span>
                 <div class="card-title">Link <span>Expired</span></div>
                 <p class="card-body">
-                    This verification link is invalid or has already been used.
+                    @(Model.ErrorMessage ?? "This verification link is invalid or has already been used.")
                 </p>
                 <div class="redirect-note">
                     <a href="/Identity/Account/Register">Register again</a> or <a href="/Identity/Account/Login">sign in</a> if your account is already active.

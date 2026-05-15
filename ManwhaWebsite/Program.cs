@@ -2,6 +2,7 @@ using ManwhaWebsite.Data;
 using ManwhaWebsite.Models;
 using ManwhaWebsite.Models.ManhwaVault.Services;
 using ManwhaWebsite.Services;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,6 +35,10 @@ if (smtpConfigured)
 }
 else
     builder.Services.AddTransient<IEmailSender<ApplicationUser>, LoggingEmailSender>();
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<ApplicationDbContext>()
+    .SetApplicationName("ManwhaWebsite");
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient<AniListService>(client =>
@@ -46,6 +51,8 @@ builder.Services.AddHttpClient<MangaUpdatesService>(client =>
 });
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<RecommendationService>();
+if (!string.IsNullOrWhiteSpace(builder.Configuration["AzureStorage:ConnectionString"]))
+    builder.Services.AddSingleton<BlobStorageService>();
 
 
 var app = builder.Build();

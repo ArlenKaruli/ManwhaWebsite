@@ -118,7 +118,8 @@
 .mfield input[type="text"],
 .mfield input[type="email"],
 .mfield input[type="password"],
-.mfield input[type="tel"] {
+.mfield input[type="tel"],
+.mfield textarea {
     width: 100%;
     max-width: 480px;
     padding: 11px 14px;
@@ -130,14 +131,21 @@
     font-size: 14px;
     outline: none;
     transition: border-color var(--transition), box-shadow var(--transition);
+    box-sizing: border-box;
 }
 
-.mfield input:focus {
+.mfield textarea {
+    resize: none;
+}
+
+.mfield input:focus,
+.mfield textarea:focus {
     border-color: rgba(232, 68, 90, 0.5);
     box-shadow: 0 0 0 3px var(--glow-soft);
 }
 
-.mfield input::placeholder {
+.mfield input::placeholder,
+.mfield textarea::placeholder {
     color: var(--text-dim);
 }
 
