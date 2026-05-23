@@ -87,7 +87,9 @@ namespace ManwhaWebsite.Services
         public Task SendContactMessageAsync(string fromName, string fromEmail, string subject, string message)
         {
             var section = _config.GetSection("EmailSettings");
-            var senderEmail = section["SenderEmail"] ?? throw new InvalidOperationException("EmailSettings:SenderEmail is not configured.");
+            var senderEmail = section["ContactEmail"]
+                ?? section["SenderEmail"]
+                ?? throw new InvalidOperationException("EmailSettings:ContactEmail is not configured.");
             var senderName = section["SenderName"] ?? "ManhwaVault";
 
             var htmlBody = $"""
