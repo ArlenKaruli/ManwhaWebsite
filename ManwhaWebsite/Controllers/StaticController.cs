@@ -5,9 +5,9 @@ namespace ManwhaWebsite.Controllers
 {
     public class StaticController : Controller
     {
-        private readonly SmtpEmailSender? _mailer;
+        private readonly IContactEmailSender? _mailer;
 
-        public StaticController(SmtpEmailSender? mailer = null)
+        public StaticController(IContactEmailSender? mailer = null)
         {
             _mailer = mailer;
         }

@@ -5,7 +5,7 @@ using System.Net.Mail;
 
 namespace ManwhaWebsite.Services
 {
-    public class SmtpEmailSender : IEmailSender<ApplicationUser>
+    public class SmtpEmailSender : IEmailSender<ApplicationUser>, IContactEmailSender
     {
         private readonly IConfiguration _config;
 

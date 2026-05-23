@@ -27,10 +27,18 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     options.Password.RequiredUniqueChars = 1;
 })
     .AddEntityFrameworkStores<ApplicationDbContext>();
-var smtpConfigured = !string.IsNullOrWhiteSpace(builder.Configuration["EmailSettings:Username"]);
-if (smtpConfigured)
+var resendConfigured = !string.IsNullOrWhiteSpace(builder.Configuration["Resend:ApiKey"]);
+var smtpConfigured   = !string.IsNullOrWhiteSpace(builder.Configuration["EmailSettings:Username"]);
+if (resendConfigured)
+{
+    builder.Services.AddHttpClient<ResendEmailSender>();
+    builder.Services.AddTransient<IEmailSender<ApplicationUser>, ResendEmailSender>();
+    builder.Services.AddTransient<IContactEmailSender, ResendEmailSender>();
+}
+else if (smtpConfigured)
 {
     builder.Services.AddTransient<IEmailSender<ApplicationUser>, SmtpEmailSender>();
+    builder.Services.AddTransient<IContactEmailSender, SmtpEmailSender>();
     builder.Services.AddTransient<SmtpEmailSender>();
 }
 else
