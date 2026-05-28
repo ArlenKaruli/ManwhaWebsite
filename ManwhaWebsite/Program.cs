@@ -4,7 +4,9 @@ using ManwhaWebsite.Models.ManhwaVault.Services;
 using ManwhaWebsite.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +60,17 @@ builder.Services.AddHttpClient<MangaUpdatesService>(client =>
     client.DefaultRequestHeaders.UserAgent.ParseAdd("ManhwaVault/1.0");
 });
 builder.Services.AddMemoryCache();
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("contact", o =>
+    {
+        o.PermitLimit = 3;
+        o.Window = TimeSpan.FromHours(1);
+        o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        o.QueueLimit = 0;
+    });
+    options.RejectionStatusCode = 429;
+});
 builder.Services.AddScoped<RecommendationService>();
 if (!string.IsNullOrWhiteSpace(builder.Configuration["AzureStorage:ConnectionString"]))
     builder.Services.AddSingleton<BlobStorageService>();
@@ -83,6 +96,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthorization();
 

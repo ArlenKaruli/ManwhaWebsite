@@ -1,5 +1,6 @@
 using ManwhaWebsite.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ManwhaWebsite.Controllers
 {
@@ -19,6 +20,7 @@ namespace ManwhaWebsite.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("contact")]
         public async Task<IActionResult> Contact(string name, string email, string subject, string message)
         {
             if (_mailer == null)
