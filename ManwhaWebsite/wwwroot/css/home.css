@@ -19,6 +19,7 @@
     --font-display: 'Bebas Neue', sans-serif;
     --font-body: 'DM Sans', sans-serif;
     --nav-h: 68px;
+    --safe-top: env(safe-area-inset-top, 0px);
     --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -142,7 +143,8 @@ button {
     left: 0;
     right: 0;
     z-index: 1000;
-    height: var(--nav-h);
+    height: calc(var(--nav-h) + var(--safe-top));
+    padding-top: var(--safe-top);
     background: rgba(13,13,18,0.85);
     backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--border);
@@ -551,9 +553,9 @@ button {
 }
 
 .hero {
-    margin-top: var(--nav-h);
+    margin-top: calc(var(--nav-h) + var(--safe-top));
     position: relative;
-    height: calc(100svh - var(--nav-h));
+    height: calc(100svh - var(--nav-h) - var(--safe-top));
     min-height: 500px;
     max-height: 780px;
     overflow: hidden;
