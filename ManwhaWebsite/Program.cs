@@ -3,6 +3,7 @@ using ManwhaWebsite.Models;
 using ManwhaWebsite.Models.ManhwaVault.Services;
 using ManwhaWebsite.Services;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -85,6 +86,11 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["AzureStorage:ConnectionStr
 
 var app = builder.Build();
 
+// Trust Railway's reverse proxy so OAuth correlation cookies work over HTTPS
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
